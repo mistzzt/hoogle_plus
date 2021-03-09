@@ -66,10 +66,12 @@ dependencies:
 - QuickCheck
 - random
 - limp
+- vector
 
 library:
   source-dirs:
   - src
+  - draft
   other-extensions:
   - TemplateHaskell
   - Rank2Types
