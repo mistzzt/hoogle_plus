@@ -22,7 +22,7 @@ import Debug.Trace
 import Control.Lens
 import Data.Ord
 
-import TED.Data.Tree.Diff (n, treeDist, simpleTreeDist)
+import TED.Data.Tree.Diff (n, treeDist, simpleTreeDist, Op(..))
 import TED.Data.Tree (Tree(..))
 
 data DataAnalysis =
@@ -60,24 +60,36 @@ instance Analyze a => Analyze (Maybe a) where
   analyze (Just x)  = Instance "Maybe" "Just" p h
     where (p, h)    = analyzeWithHeight x
 
-instance (Analyze a, Analyze b) => Analyze (Either a b) where analyze = \case Left x -> let (p, h) = analyzeWithHeight x in Instance "Either" "Left" p h; Right x -> let (p, h) = analyzeWithHeight [x] in Instance "Either" "Right" p h
+instance (Analyze a, Analyze b) => Analyze (Either a b) where analyze = \case Left x -> let (p, h) = analyzeWithHeight x in Instance "Either" "Left" p h; Right x -> let (p, h) = analyzeWithHeight x in Instance "Either" "Right" p h
 instance (Analyze a, Analyze b) => Analyze (a, b) where analyze (l, r) = let (p, h) = analyzeWithHeight2 l r in Instance "(,)" "," p h
+
+cost :: Eq l => Op l -> Int
+cost (Ins _) = 1
+cost (Del _) = 1
+cost (Rep f t) | f == t = 0
+               | otherwise = 2
+
+customTreeDist :: Eq l => Tree l -> Tree l -> Int
+customTreeDist x1 x2 = treeDist x1 x2 cost
 
 -- | baseline: select start element x, then sort w.r.t. x
 sortWithTreeDist1 :: (Analyze a, Show a, Eq a) => [a] -> [(a, Int)]
 sortWithTreeDist1 xs =
     let
       xs' = map (\x -> (x, analyze x)) xs
-      s   = minimumBy (comparing (height . snd)) xs'
-      r   = map (second (simpleTreeDist (convertDataAnalysis $ snd s) . convertDataAnalysis)) xs'
+      s   = traceShowId $ minimumBy (comparing (height . snd)) xs'
+      r   = map (second (customTreeDist (convertDataAnalysis $ snd s) . convertDataAnalysis)) xs'
     in
-      second (const 0) s : sortOn (Down . snd) r
+      sortOn (Down . snd) r
 
 -- | variant-2: select start x, then select the next element iteratively (s.t. maximize the distance sum)
+-- result = [x, y, z] (sorted)
+-- xs = [a, b] -> compute [[(a, x), (a, y), ...], [(b, x), (b, y), ...]] -> map maximum (a) --> result = [x, y, z, a]
 sortWithTreeDist2 :: (Analyze a, Show a, Eq a) => [a] -> [(a, Int)]
 sortWithTreeDist2 xs =
     let
       r = [(minimumBy (comparing (height . analyze)) xs, 0)]
+      -- xs' = xs \\ [fst $ head r]
     in
       view _1 $ foldl step (r, xs) [0..length xs - 1]
   where
@@ -91,13 +103,17 @@ sortWithTreeDist2 xs =
         (r ++ [p], s \\ [fst p])
 
     compareTwo :: Analyze a => a -> a -> Int
-    compareTwo a b = simpleTreeDist (convertDataAnalysis $ analyze a) (convertDataAnalysis $ analyze b)
+    compareTwo a b = customTreeDist (convertDataAnalysis $ analyze a) (convertDataAnalysis $ analyze b)
 
 -- | variant-3: select start x, then select the next element iteratively (s.t. maximize the minimum distance)
+-- result = [x, y, z] (sorted)
+-- xs = [a, b] -> compute [[(a, x), (a, y), ...], [(b, x), (b, y), ...]] -> map minimum --> pick the element with maximum edit distance --> result = [x, y, z, a]
+-- x should have the max distance among all possible results
 sortWithTreeDist3 :: (Analyze a, Show a, Eq a) => [a] -> [(a, Int)]
 sortWithTreeDist3 xs =
     let
       r = [(minimumBy (comparing (height . analyze)) xs, 0)]
+      -- xs' = xs \\ [fst $ head r]
     in
       view _1 $ foldl step (r, xs) [0..length xs - 1]
   where
@@ -111,10 +127,7 @@ sortWithTreeDist3 xs =
         (r ++ [p], s \\ [fst p])
 
     compareTwo :: Analyze a => a -> a -> Int
-    compareTwo a b = simpleTreeDist (convertDataAnalysis $ analyze a) (convertDataAnalysis $ analyze b)
-
-sortWithTreeDist :: (Analyze a, Show a, Eq a) => [a] -> [(a, Int)]
-sortWithTreeDist = sortWithTreeDist3
+    compareTwo a b = customTreeDist (convertDataAnalysis $ analyze a) (convertDataAnalysis $ analyze b)
 
 elementwiseSum :: Num a => [(a, a)] -> (a, a)
 elementwiseSum xs = bimap sum sum $ unzip xs
@@ -156,11 +169,19 @@ compareData (Instance xt xc xps _) (Instance _ yc yps _) depth isRecType = case 
         createResult r isRecType = if isRecType then (r, 0) else (0, r)
         testRecType parentTypeName (Instance t _ _ _) = t == parentTypeName
 
+sortWithTreeDist :: (Analyze a, Show a, Eq a) => [a] -> [(a, Int)]
+sortWithTreeDist = sortWithTreeDist2
+
 main_ = do
-    qcLists <- QC.generate QC.arbitrary :: IO [Either Bool Int]
+    -- qcLists <- QC.generate QC.arbitrary :: IO [Maybe [Int]]
+    qcLists <- return $ list 4 series :: IO [Maybe [Int]]
     -- scLists <- return $ list 5 series :: IO [Either Bool Int]
 
     r <- evaluate $ force $ sortWithTreeDist qcLists
+
+    putStrLn (printf "#sorted - #original = %d" (length r - length qcLists))
+    -- print ( analyze (Right (-24) :: Either Bool Int))
+    -- print (convertDataAnalysis $ analyze (Left False :: Either Bool Int))
 
     putStrLn (printf "Input: \t%s" (show qcLists))
     putStrLn (printf "Result: %s" (show r))
