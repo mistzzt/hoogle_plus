@@ -124,7 +124,7 @@ replaceMyType x =
 
 
 buildFunctionWrapper :: [(String, String)] -> FunctionSignature -> (String, String, String, String, String) -> String
-buildFunctionWrapper functions solutionType@FunctionSignature{_returnType} params@(plain, typed, shows, showConstrs, unwrp) =
+buildFunctionWrapper functions solutionType@FunctionSignature{_returnType} params@(plain, typed, shows, analyses, unwrp) =
     unwords
       (map (buildLetFunction $ show solutionType) functions ++ [buildWrapper (map fst functions) params (show _returnType)])
   where
@@ -134,20 +134,20 @@ buildFunctionWrapper functions solutionType@FunctionSignature{_returnType} param
 
     -- ! the wrapper magic (i.e. MyInt) only lives here (inside `typed`)
     buildWrapper :: [String] -> (String, String, String, String, String) -> String -> String
-    buildWrapper wrapperNames (plain, typed, shows, showConstrs, unwrp) retType =
+    buildWrapper wrapperNames (plain, typed, shows, analyses, unwrp) retType =
       printf "let executeWrapper %s = (Prelude.map (\\f -> f %s :: %s) [%s]) in" typed unwrp retType (intercalate ", " wrapperNames) :: String
 
 buildNotCrashProp :: String -> FunctionSignature -> String
 buildNotCrashProp solution funcSig = formatNotCrashProp params wrapper
   where
-    params@(plain, typed, shows, showConstrs, unwrp) = showParams (_argsType funcSig)
+    params@(plain, typed, shows, analyses, unwrp) = showParams (_argsType funcSig)
 
     wrapper = buildFunctionWrapper [("wrappedSolution", solution)] funcSig params
     formatNotCrashProp = formatProp "prop_not_crash" "\\out -> (not $ isFailedResult $ Prelude.head out) ==> True"
 
-    formatProp propName propBody (plain, typed, shows, showConstrs, unwrp) wrappedSolution = unwords
+    formatProp propName propBody (plain, typed, shows, analyses, unwrp) wrappedSolution = unwords
       [ wrappedSolution
-      , printf "let %s %s = monadicIO $ run $ labelEvaluation (%s) (%s) (executeWrapper %s) (%s) in" propName plain shows showConstrs plain propBody
+      , printf "let %s %s = monadicIO $ run $ labelEvaluation (%s) (%s) (executeWrapper %s) (%s) in" propName plain shows analyses plain propBody
       , printf "quickCheckWithResult defaultTestArgs %s" propName ] :: String
 
 buildDupCheckProp :: (String, [String]) -> FunctionSignature -> [String]
@@ -157,14 +157,14 @@ buildDupCheckProp (sol, otherSols) funcSig =
 buildDupCheckProp' :: (String, [String]) -> FunctionSignature -> String
 buildDupCheckProp' (sol, otherSols) funcSig = unwords [wrapper, formatProp]
   where
-    params@(plain, typed, shows, showConstrs, unwrp) = showParams (_argsType funcSig)
+    params@(plain, typed, shows, analyses, unwrp) = showParams (_argsType funcSig)
     solutionType = show funcSig
 
     wrapper = buildFunctionWrapper solutions funcSig params
     solutions = zip [printf "result_%d" x :: String | x <- [0..] :: [Int]] (sol:otherSols)
 
     formatProp = unwords
-      [ printf "let prop_duplicate %s = monadicIO $ run $ labelEvaluation (%s) (%s) (executeWrapper %s) (\\out -> (not $ anyDuplicate out) ==> True) in" plain shows showConstrs plain
+      [ printf "let prop_duplicate %s = monadicIO $ run $ labelEvaluation (%s) (%s) (executeWrapper %s) (\\out -> (not $ anyDuplicate out) ==> True) in" plain shows analyses plain
       , printf "quickCheckWithResult defaultTestArgs prop_duplicate" ] :: String
 
 -- | Run Hint with the default script loaded.
@@ -221,8 +221,9 @@ validateCandidate modules solution funcSig = do
     readResult :: BackendResult -> CandidateValidDesc
     readResult r@QC.GaveUp{QC.numTests}
               | numTests == 0 = Invalid
-              | otherwise     = (Partial . pickExamples . parseExamples) r
-    readResult r@QC.Success{} = (Total . pickExamples . parseExamples) r
+              | otherwise     = (Partial . parseExamples) r
+    readResult r@QC.Success{} = (Total . parseExamples) r
+    readResult r              = trace (show r) Invalid
 
 -- >>> (evalStateT (classifyCandidate ["Data.Either", "GHC.List", "Data.Maybe", "Data.Function"] "\\e f -> Data.Either.either f (GHC.List.head []) e" (instantiateSignature $ parseTypeString "Either a b -> (a -> b) -> b") ["\\e f -> Data.Either.fromRight (f (Data.Maybe.fromJust Data.Maybe.Nothing)) e", "\\e f -> Data.Either.either f Data.Function.id e"]) emptyFilterState) :: IO CandidateDuplicateDesc
 classifyCandidate :: MonadIO m => [String] -> Candidate -> FunctionSignature -> [Candidate] -> FilterTest m CandidateDuplicateDesc
@@ -300,7 +301,7 @@ checkDuplicates modules funcSig candidate = do
 -- >>> showParams [Concrete "Int", Concrete "String"]
 -- ("(arg_1) (arg_2)","(arg_1 :: MyInt) (arg_2 :: [MyChar])","[(show arg_1), (show arg_2)]","(unwrap arg_1) (unwrap arg_2)")
 showParams :: [ArgumentType] -> (String, String, String, String, String)
-showParams args = (plain, typed, shows, showConstrs, unwrp)
+showParams args = (plain, typed, shows, analyses, unwrp)
   where
     args' = zip [1..] $ map replaceMyType args
 
@@ -309,7 +310,7 @@ showParams args = (plain, typed, shows, showConstrs, unwrp)
     typed = unwords $ map (\(idx, tipe) -> printf "(arg_%d :: %s)" idx (show tipe) :: String) args'
 
     shows = "[" ++ intercalate ", " (formatIdx "(show arg_%d)") ++ "]"
-    showConstrs =  "[" ++ intercalate ", " (formatIdx "(showConstr arg_%d)") ++ "]"
+    analyses =  "[" ++ intercalate ", " (formatIdx "(analyze arg_%d)") ++ "]"
     formatIdx format = map ((printf format :: Int -> String) . fst) args'
 
 -- | Parse Example string from QC.label to Example

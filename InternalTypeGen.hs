@@ -1,7 +1,8 @@
-{-# LANGUAGE FlexibleInstances, MultiParamTypeClasses, DeriveDataTypeable, LambdaCase #-}
+{-# LANGUAGE FlexibleInstances, MultiParamTypeClasses, DeriveDataTypeable, LambdaCase, DeriveGeneric, DeriveAnyClass #-}
 module InternalTypeGen where
 
-import Control.DeepSeq (force)
+import GHC.Generics (Generic)
+import Control.DeepSeq (force, NFData(..))
 import Control.Exception (evaluate)
 import Control.Monad (liftM2)
 import Control.Monad.Logic (liftM)
@@ -19,6 +20,18 @@ defaultIntRange           = [-2..10]    :: [Int]
 defaultCharRange          = ['a'..'d']  :: [Char]
 defaultFuncSpecialSize    = 4           :: Int
 defaultTestArgs           = QC.stdArgs {QC.chatty = False, QC.maxDiscardRatio = 1, QC.maxSuccess = 100, QC.maxSize = 7} :: QC.Args
+
+data InternalExample = InternalExample {
+    params :: [String],
+    analyses :: [DataAnalysis]
+} deriving(Eq, Show)
+
+data DataAnalysis =
+  Instance  { typeName          :: String
+            , constructorName   :: String
+            , parameters        :: [DataAnalysis]
+            , height            :: Int
+            } deriving (Show, Eq, Generic, NFData)
 
 instance Eq a => Eq (CB.Result a) where
   (CB.Value a) == (CB.Value b) = a == b
@@ -43,42 +56,38 @@ isFailedResult result = case result of
   CB.Value a | "Exception" `isInfixOf` a -> True
   _ -> False
 
-showCBResult :: CB.Result String -> String
-showCBResult = \case
-                  CB.Value a | "_|_" `isInfixOf` a -> "bottom"
-                  CB.Value a -> a
-                  CB.NonTermination -> "diverge"
-                  CB.Exception ex -> show ex
-
 anyDuplicate :: Ord a => [a] -> Bool
 anyDuplicate [x, y] = x == y
 anyDuplicate xs = length (nubOrd xs) /= length xs
 
-labelEvaluation :: (Data a, ShowConstr a, QC.Testable prop) => [String] -> [String] -> [a] -> ([CB.Result String] -> prop) -> IO QC.Property
-labelEvaluation inputs inputConstrs values prop = do
+labelEvaluation :: (Data a, Analyze a, QC.Testable prop) => [String] -> [DataAnalysis] -> [a] -> ([CB.Result String] -> prop) -> IO QC.Property
+labelEvaluation inputs inputAnalyses values prop = do
     outputs <- map splitResult <$> mapM (evaluateValue defaultTimeoutMicro) values
     
-    let examples = map (\(a, b) -> InternalExample inputs inputConstrs (showCBResult a) (showCBResult b)) outputs
+    let examples = map (\(a, b) -> InternalExample (inputs ++ [showCBResult a]) (inputAnalyses ++ [convertCBAnalysis b])) outputs
     return $ QC.label (show examples) (prop $ map fst outputs)
   where
-    evaluateValue :: (Data a, ShowConstr a) => Int -> a -> IO (CB.Result (String, String))
+    evaluateValue :: (Data a, Analyze a) => Int -> a -> IO (CB.Result (String, DataAnalysis))
     evaluateValue timeInMicro x = CB.timeOutMicro timeInMicro $ liftM2 (,) (t x) (s x)
       where
         t = evaluate . force . CB.approxShow defaultMaxOutputLength
-        s = evaluate . CB.approxShow defaultMaxOutputLength . showConstr
+        s = evaluate . force . analyze -- evaluate only evaluates to weak head normal form
 
-    splitResult :: CB.Result (String, String) -> (CB.Result String, CB.Result String)
+    splitResult :: CB.Result (a, b) -> (CB.Result a, CB.Result b)
     splitResult = \case
       CB.Value (a, b) -> (CB.Value a, CB.Value b)
       CB.NonTermination -> (CB.NonTermination, CB.NonTermination)
       CB.Exception ex -> (CB.Exception ex, CB.Exception ex)
 
-data InternalExample = InternalExample {
-    inputs :: [String],
-    inputConstrs :: [String],
-    output :: String,
-    outputConstr :: String
-} deriving(Eq, Show)
+    showCBResult :: CB.Result String -> String
+    showCBResult = \case
+                      CB.Value a | "_|_" `isInfixOf` a -> "bottom"
+                      CB.Value a -> a
+                      CB.NonTermination -> "diverge"
+                      CB.Exception ex -> show ex
+
+    convertCBAnalysis :: CB.Result DataAnalysis -> DataAnalysis
+    convertCBAnalysis = \case CB.Value a -> a; _ -> Instance "error" "DNE" [] 0
 
 -- * Custom Datatype for Range Restriction
 newtype  MyInt = MyIntValue Int deriving (Eq, Data)
@@ -121,16 +130,27 @@ instance (Unwrappable a c, Unwrappable b d)   => Unwrappable (Either a b) (Eithe
   wrap    = \case Left v -> Left $ wrap v;    Right v -> Right $ wrap v
   unwrap  = \case Left v -> Left $ unwrap v;  Right v -> Right $ unwrap v
 
-class                                       ShowConstr a            where showConstr :: a -> String
-instance                                    ShowConstr Int          where showConstr x = show $ x `compare` 0
-instance                                    ShowConstr Bool         where showConstr = show
-instance                                    ShowConstr Char         where showConstr = const "_"
-instance                                    ShowConstr MyInt        where showConstr = const "_"
-instance                                    ShowConstr MyChar       where showConstr = const "_"
-instance                                    ShowConstr (Box a)      where showConstr = const "_"
-instance                                    ShowConstr (a -> b)     where showConstr = const "<func>"
-instance                                    ShowConstr (MyFun a b)  where showConstr = \case Generated _ -> "<func>"; Expression n _ -> n
-instance  ShowConstr a                  =>  ShowConstr (Maybe a)    where showConstr = \case Just x -> "Just$" ++ showConstr x; Nothing -> "Nothing"
-instance  (ShowConstr a, ShowConstr b)  =>  ShowConstr (a, b)       where showConstr (x, y) = printf "(%s,%s)" (showConstr x) (showConstr y)
-instance  (ShowConstr a)                =>  ShowConstr [a]          where showConstr xs = intercalate "," $ map showConstr xs
-instance  (ShowConstr a, ShowConstr b)  =>  ShowConstr (Either a b) where showConstr = \case Left x -> "Left$" ++ showConstr x; Right y -> "Right$" ++ showConstr y
+
+-- * Data Analysis
+class                                       AnalyzeManyType r               where amImpl :: [DataAnalysis] -> r
+instance                                    AnalyzeManyType [DataAnalysis]  where amImpl = id
+instance (Analyze a, AnalyzeManyType b) =>  AnalyzeManyType (a -> b)        where amImpl acc = amImpl . (acc ++) . (:[]) . analyze
+
+analyzeMany :: (AnalyzeManyType r) => r
+analyzeMany = amImpl []
+
+createInstance :: String -> String -> [DataAnalysis] -> DataAnalysis
+createInstance typeName constrName params = Instance typeName constrName params (maybe 0 (+1) (foldr max Nothing $ map (Just . height) params))
+
+class                               Analyze a             where analyze :: a -> DataAnalysis
+instance                            Analyze Int           where analyze x = Instance "Int"  (show $ x `compare` 0)  [] 0
+instance                            Analyze Bool          where analyze x = Instance "Bool" (show x)                [] 0
+instance                            Analyze Char          where analyze x = Instance "Char" "_"                     [] 0
+instance                            Analyze MyInt         where analyze = analyze . (unwrap :: MyInt -> Int)
+instance                            Analyze MyChar        where analyze = analyze . (unwrap :: MyChar -> Char)
+instance                            Analyze (MyFun a b)   where analyze = \case Generated _ -> Instance "Fun" "_" [] 0; Expression n _ -> Instance "Fun" n [] 0
+instance Analyze a              =>  Analyze (Box a)       where analyze = analyze . (\(BoxValue v) -> v)
+instance Analyze a              =>  Analyze [a]           where analyze = \case [] -> createInstance "List" "Nil" []; x:xs -> createInstance "List" "Cons" (analyzeMany x xs)
+instance Analyze a              =>  Analyze (Maybe a)     where analyze = maybe (createInstance "Maybe" "Nothing" []) (createInstance "Maybe" "Just" . analyzeMany)
+instance (Analyze a, Analyze b) =>  Analyze (Either a b)  where analyze = either (createInstance "Either" "Left" . analyzeMany) (createInstance "Either" "Right" . analyzeMany)
+instance (Analyze a, Analyze b) =>  Analyze (a, b)        where analyze (l, r) = createInstance "(,)" "," (analyzeMany l r)

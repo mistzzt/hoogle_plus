@@ -36,17 +36,23 @@ type AssociativeInternalExamples = [(Candidate, [InternalExample])]
 type AssociativeExamples = [(Candidate, [Example])]
 
 data InternalExample = InternalExample {
-    inputs :: [String],
-    inputConstrs :: [String],
-    output :: String,
-    outputConstr :: String
+    params :: [String],
+    analyses :: [DataAnalysis]
 } deriving(Eq, Read)
 
+data DataAnalysis =
+  Instance  { typeName          :: String
+            , constructorName   :: String
+            , parameters        :: [DataAnalysis]
+            , height            :: Int
+            } deriving (Show, Eq, Read)
+
+
 instance Show InternalExample where
-    show e = unwords [unwords (inputs e), "==>", output e]
+    show (InternalExample params _) = unwords [unwords (init params), "-->", last params]
 
 toExample :: InternalExample -> Example
-toExample (InternalExample i _ o _) = Example i o
+toExample (InternalExample params _) = Example (init params) (last params)
 
 data CandidateValidDesc =
     Total   [InternalExample]
@@ -132,54 +138,10 @@ class TestPassable a where isSuccess :: a -> Bool
 instance TestPassable CandidateValidDesc where
   isSuccess = \case
     Invalid -> False
+    Unknown _ -> False
     _       -> True
 
 instance TestPassable CandidateDuplicateDesc where
   isSuccess = \case
     New _ -> True
     _   -> False
-
-
-pickExamples :: [InternalExample] -> [InternalExample]
-pickExamples = pickExamples1
-
-pickExamples1 :: [InternalExample] -> [InternalExample]
-pickExamples1 examples =
-  let examplesGroupedByOutput = groupOn outputConstr (filter noGenerated examples) in
-  let examplesGroupedByInput  = map (map last . groupOn inputConstrs) examplesGroupedByOutput in
-    concatMap (take 10) examplesGroupedByInput
-    
-    where
-      noGenerated :: InternalExample -> Bool
-      noGenerated ex = "<Generated>" `notElem` inputs ex
-
-      groupOn :: (Ord b) => (a -> b) -> [a] -> [[a]]
-      groupOn f =
-        let unpack = fmap snd . Map.toList
-            fld m a = case Map.lookup (f a) m of
-              Nothing -> Map.insert (f a) [a] m
-              Just as -> Map.insert (f a) (a:as) m
-        in unpack . foldl fld Map.empty
-
-pickExamples2 :: [InternalExample] -> [InternalExample]
-pickExamples2 examples =
-  let examplesGroupedByOutput = groupOn outputConstr (filter noGenerated examples) in
-  let otherDistinctExamples = map (nubBy anySameInput) examplesGroupedByOutput in
-    concatMap (take 10) otherDistinctExamples
-    
-    where
-      noGenerated :: InternalExample -> Bool
-      noGenerated ex = "<Generated>" `notElem` inputs ex
-
-      groupOn :: (Ord b) => (a -> b) -> [a] -> [[a]]
-      groupOn f =
-        let unpack = fmap snd . Map.toList
-            fld m a = case Map.lookup (f a) m of
-              Nothing -> Map.insert (f a) [a] m
-              Just as -> Map.insert (f a) (a:as) m
-        in unpack . foldl fld Map.empty
-
-      anySameInput :: InternalExample -> InternalExample -> Bool
-      anySameInput l r = let (inputsL, inputsR) = (inputs l, inputs r) in any (uncurry (==)) (zip inputsL inputsR)
-
-
