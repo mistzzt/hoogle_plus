@@ -20,17 +20,12 @@ import qualified Data.Map as Map
 import Data.Bifunctor
 import Debug.Trace
 import Control.Lens
-import Data.Ord
+import Data.Ord ( comparing, Down(Down) )
 
 import TED.Data.Tree.Diff (n, treeDist, simpleTreeDist, Op(..))
 import TED.Data.Tree (Tree(..))
 
-data DataAnalysis =
-  Instance  { typeName          :: String
-            , constructorName   :: String
-            , parameters        :: [DataAnalysis]
-            , height            :: Int
-            } deriving (Show, Eq)
+import Types.Filtering (DataAnalysis(..))
 
 convertDataAnalysis :: DataAnalysis -> Tree String
 convertDataAnalysis Instance {constructorName, parameters} = n constructorName (map convertDataAnalysis parameters)
@@ -46,22 +41,22 @@ analyzeWithHeight2 a b =
         (instances, 1 + maximum (map height instances))
 
 class    Analyze a    where analyze :: a -> DataAnalysis
-instance Analyze Int  where analyze x = Instance "Int"  (show $ x `compare` 0)  [] 0
-instance Analyze Bool where analyze x = Instance "Bool" (show x)                [] 0
-instance Analyze Char where analyze x = Instance "Char" "_"                     [] 0
+instance Analyze Int  where analyze x = Instance "Int"  (show $ x `compare` 0)  "" [] 0
+instance Analyze Bool where analyze x = Instance "Bool" (show x)                "" [] 0
+instance Analyze Char where analyze x = Instance "Char" "_"                     "" [] 0
 
 instance Analyze a => Analyze [a] where
-  analyze []        = Instance "List" "Nil"  [] 0
-  analyze (x:xs)    = Instance "List" "Cons" p  h
+  analyze []        = Instance "List" "Nil" ""  [] 0
+  analyze (x:xs)    = Instance "List" "Cons" "" p  h
     where (p, h)    = analyzeWithHeight2 x xs
 
 instance Analyze a => Analyze (Maybe a) where
-  analyze Nothing   = Instance "Maybe" "Nothing" [] 0
-  analyze (Just x)  = Instance "Maybe" "Just" p h
+  analyze Nothing   = Instance "Maybe" "Nothing" "" [] 0
+  analyze (Just x)  = Instance "Maybe" "Just" "" p h
     where (p, h)    = analyzeWithHeight x
 
-instance (Analyze a, Analyze b) => Analyze (Either a b) where analyze = \case Left x -> let (p, h) = analyzeWithHeight x in Instance "Either" "Left" p h; Right x -> let (p, h) = analyzeWithHeight x in Instance "Either" "Right" p h
-instance (Analyze a, Analyze b) => Analyze (a, b) where analyze (l, r) = let (p, h) = analyzeWithHeight2 l r in Instance "(,)" "," p h
+instance (Analyze a, Analyze b) => Analyze (Either a b) where analyze = \case Left x -> let (p, h) = analyzeWithHeight x in Instance "Either" "Left" "" p h; Right x -> let (p, h) = analyzeWithHeight x in Instance "Either" "Right" "" p h
+instance (Analyze a, Analyze b) => Analyze (a, b) where analyze (l, r) = let (p, h) = analyzeWithHeight2 l r in Instance "(,)" "," "" p h
 
 cost :: Eq l => Op l -> Int
 cost (Ins _) = 1
@@ -159,7 +154,7 @@ sort xs depth = view _1 $ foldl g (traceShowId [minimumBy (comparing (height . a
 
 
 compareData :: DataAnalysis -> DataAnalysis -> Int -> Bool -> (Int, Int)
-compareData (Instance xt xc xps _) (Instance _ yc yps _) depth isRecType = case depth of
+compareData (Instance xt xc _ xps _) (Instance _ yc _ yps _) depth isRecType = case depth of
         0 -> createResult (if xc == yc then 0 else 1) isRecType
         n -> if xc /= yc
             then createResult 1 isRecType
@@ -167,7 +162,7 @@ compareData (Instance xt xc xps _) (Instance _ yc yps _) depth isRecType = case 
 
     where
         createResult r isRecType = if isRecType then (r, 0) else (0, r)
-        testRecType parentTypeName (Instance t _ _ _) = t == parentTypeName
+        testRecType parentTypeName (Instance t _ _ _ _) = t == parentTypeName
 
 sortWithTreeDist :: (Analyze a, Show a, Eq a) => [a] -> [(a, Int)]
 sortWithTreeDist = sortWithTreeDist2

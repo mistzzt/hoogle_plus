@@ -37,6 +37,7 @@ import Types.Program
 import Types.Type hiding (typeOf)
 import PetriNet.Utils (unHTML)
 import Synquid.Utils (getTmpDir)
+import HooglePlus.ExampleSorter
 
 
 import Debug.Trace
@@ -221,8 +222,8 @@ validateCandidate modules solution funcSig = do
     readResult :: BackendResult -> CandidateValidDesc
     readResult r@QC.GaveUp{QC.numTests}
               | numTests == 0 = Invalid
-              | otherwise     = (Partial . parseExamples) r
-    readResult r@QC.Success{} = (Total . parseExamples) r
+              | otherwise     = (Partial . selectExamples . parseExamples) r
+    readResult r@QC.Success{} = (Total . selectExamples . parseExamples) r
     readResult r              = trace (show r) Invalid
 
 -- >>> (evalStateT (classifyCandidate ["Data.Either", "GHC.List", "Data.Maybe", "Data.Function"] "\\e f -> Data.Either.either f (GHC.List.head []) e" (instantiateSignature $ parseTypeString "Either a b -> (a -> b) -> b") ["\\e f -> Data.Either.fromRight (f (Data.Maybe.fromJust Data.Maybe.Nothing)) e", "\\e f -> Data.Either.either f Data.Function.id e"]) emptyFilterState) :: IO CandidateDuplicateDesc
@@ -316,6 +317,15 @@ showParams args = (plain, typed, shows, analyses, unwrp)
 -- | Parse Example string from QC.label to Example
 parseExamples :: BackendResult -> [InternalExample]
 parseExamples result = concatMap (read . head) $ Map.keys $ QC.labels result
+
+selectExamples :: [InternalExample] -> [InternalExample]
+selectExamples = take 5 . map (unpackNodes . fst) . sortWithTreeDistVar . map packNodes
+  where
+    packNodes :: InternalExample -> DataAnalysis
+    packNodes (InternalExample dts) = Instance "Root" "!" "" dts (1 + maximum (map height dts))
+
+    unpackNodes :: DataAnalysis -> InternalExample
+    unpackNodes (Instance _ _ _ dts _) = InternalExample dts
 
 -- | Extract higher-order arguments from a type signature.
 -- >>> extractHigherOrderQuery $ parseTypeString "a -> (a -> b) -> [(a -> b -> c)] -> b"

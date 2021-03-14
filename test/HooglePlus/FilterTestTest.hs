@@ -111,7 +111,7 @@ dupCheckTests =
 tests :: TestTree
 tests = testGroup "Filter" $
     map itNotCrashCase testNotCrashHOFs ++
-    map itNotCrashCase testNotCrashCases
+    map itNotCrashCase testNotCrashCases ++
     -- map itNotCrashCase testNotCrashNonTerms ++
-    -- map itDupCase testDups ++
-    -- map itDupCase dupCheckTests
+    map itDupCase testDups ++
+    map itDupCase dupCheckTests

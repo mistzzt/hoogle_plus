@@ -35,24 +35,22 @@ type GeneratorResult = [Example]
 type AssociativeInternalExamples = [(Candidate, [InternalExample])]
 type AssociativeExamples = [(Candidate, [Example])]
 
-data InternalExample = InternalExample {
-    params :: [String],
-    analyses :: [DataAnalysis]
-} deriving(Eq, Read)
+newtype InternalExample = InternalExample [DataAnalysis] deriving (Read, Eq)
 
 data DataAnalysis =
   Instance  { typeName          :: String
             , constructorName   :: String
+            , expr              :: String
             , parameters        :: [DataAnalysis]
             , height            :: Int
             } deriving (Show, Eq, Read)
 
 
 instance Show InternalExample where
-    show (InternalExample params _) = unwords [unwords (init params), "-->", last params]
+    show (InternalExample params) = unwords [unwords (map expr $ init params), "-->", expr $ last params]
 
 toExample :: InternalExample -> Example
-toExample (InternalExample params _) = Example (init params) (last params)
+toExample (InternalExample params) = Example (map expr $ init params) (expr $ last params)
 
 data CandidateValidDesc =
     Total   [InternalExample]
