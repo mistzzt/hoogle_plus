@@ -21,8 +21,6 @@ higherOrderGenMaxSize = 5 :: Int
 frameworkModules =
   zip [ "Test.QuickCheck"
   , "Test.QuickCheck.Monadic"
-  , "Test.QuickCheck.Function"
-  , "Control.Exception"
   , "Control.Monad"
   ] (repeat Nothing)
 

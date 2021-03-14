@@ -107,7 +107,7 @@ instance QC.CoArbitrary   MyInt where coarbitrary (MyIntValue v) = QC.coarbitrar
 
 newtype  MyChar = MyCharValue Char deriving (Eq, Data)
 instance Ord              MyChar where compare (MyCharValue l) (MyCharValue r) = compare l r
-instance Show             MyChar where show (MyCharValue v) = show v
+instance Show             MyChar where show (MyCharValue v) = show v; showList = showList . (unwrap :: [MyChar] -> [Char])
 instance QC.Arbitrary     MyChar where arbitrary = QC.elements (map MyCharValue defaultCharRange)
 instance QC.CoArbitrary   MyChar where coarbitrary (MyCharValue v) = QC.coarbitrary $ ord v
 

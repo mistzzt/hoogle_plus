@@ -1,7 +1,7 @@
 {-# LANGUAGE FlexibleContexts #-}
 module HooglePlus.ExampleSorter where
 
-import Data.List (sortOn, sortBy, (\\), maximumBy, minimumBy)
+import Data.List (sortOn, sortBy, (\\), maximumBy, minimumBy, foldl')
 import qualified Data.Map as Map
 import Data.Bifunctor
 import Control.Lens
@@ -20,7 +20,7 @@ sortWithTreeDistVar xs =
     let
       r = [(minimumBy (comparing height) xs, 0)]
     in
-      view _1 $ foldl step (r, xs) [0..length xs - 1]
+      view _1 $ foldl' step (r, xs) [0..length xs - 1]
   where
     step :: ([(DataAnalysis, Int)], [DataAnalysis]) -> Int -> ([(DataAnalysis, Int)], [DataAnalysis])
     step (r, s) _ =

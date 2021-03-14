@@ -8,7 +8,7 @@ import Control.Monad.Logic (liftM)
 import Data.Char (ord)
 import Data.Containers.ListUtils (nubOrd)
 import Data.Data (Data(..))
-import Data.List (isInfixOf, elemIndex, nub, drop, reverse, intersect, intercalate)
+import Data.List (isInfixOf, elemIndex, nub, drop, reverse, intersect, intercalate, foldl')
 import Text.Printf (printf)
 import qualified Test.ChasingBottoms as CB
 import qualified Test.QuickCheck as QC
@@ -40,6 +40,11 @@ analyzeWithHeight2 a b =
     let instances = [analyze a, analyze b] in
         (instances, 1 + maximum (map height instances))
 
+analyzeWithHeight3 :: (Analyze a, Analyze b, Analyze c) => a -> b -> c -> ([DataAnalysis], Int)
+analyzeWithHeight3 a b c =
+    let instances = [analyze a, analyze b, analyze c] in
+        (instances, 1 + maximum (map height instances))
+
 class    Analyze a    where analyze :: a -> DataAnalysis
 instance Analyze Int  where analyze x = Instance "Int"  (show $ x `compare` 0)  "" [] 0
 instance Analyze Bool where analyze x = Instance "Bool" (show x)                "" [] 0
@@ -57,6 +62,8 @@ instance Analyze a => Analyze (Maybe a) where
 
 instance (Analyze a, Analyze b) => Analyze (Either a b) where analyze = \case Left x -> let (p, h) = analyzeWithHeight x in Instance "Either" "Left" "" p h; Right x -> let (p, h) = analyzeWithHeight x in Instance "Either" "Right" "" p h
 instance (Analyze a, Analyze b) => Analyze (a, b) where analyze (l, r) = let (p, h) = analyzeWithHeight2 l r in Instance "(,)" "," "" p h
+instance (Analyze a, Analyze b, Analyze c) => Analyze (a, b, c) where
+  analyze (a, b, c) = let (p, h) = analyzeWithHeight3 a b c in Instance "(,,)" "," "" p h
 
 cost :: Eq l => Op l -> Int
 cost (Ins _) = 1
@@ -72,7 +79,7 @@ sortWithTreeDist1 :: (Analyze a, Show a, Eq a) => [a] -> [(a, Int)]
 sortWithTreeDist1 xs =
     let
       xs' = map (\x -> (x, analyze x)) xs
-      s   = traceShowId $ minimumBy (comparing (height . snd)) xs'
+      s   = minimumBy (comparing (height . snd)) xs'
       r   = map (second (customTreeDist (convertDataAnalysis $ snd s) . convertDataAnalysis)) xs'
     in
       sortOn (Down . snd) r
@@ -86,7 +93,7 @@ sortWithTreeDist2 xs =
       r = [(minimumBy (comparing (height . analyze)) xs, 0)]
       -- xs' = xs \\ [fst $ head r]
     in
-      view _1 $ foldl step (r, xs) [0..length xs - 1]
+      view _1 $ foldl' step (r, xs) [0..length xs - 1]
   where
     step :: (Analyze a, Show a, Eq a) => ([(a, Int)], [(a)]) -> Int -> ([(a, Int)], [a])
     step (r, s) _ =
@@ -110,7 +117,7 @@ sortWithTreeDist3 xs =
       r = [(minimumBy (comparing (height . analyze)) xs, 0)]
       -- xs' = xs \\ [fst $ head r]
     in
-      view _1 $ foldl step (r, xs) [0..length xs - 1]
+      view _1 $ foldl' step (r, xs) [0..length xs - 1]
   where
     step :: (Analyze a, Show a, Eq a) => ([(a, Int)], [(a)]) -> Int -> ([(a, Int)], [a])
     step (r, s) _ =
@@ -165,16 +172,17 @@ compareData (Instance xt xc _ xps _) (Instance _ yc _ yps _) depth isRecType = c
         testRecType parentTypeName (Instance t _ _ _ _) = t == parentTypeName
 
 sortWithTreeDist :: (Analyze a, Show a, Eq a) => [a] -> [(a, Int)]
-sortWithTreeDist = sortWithTreeDist2
+sortWithTreeDist = sortWithTreeDist3
 
 main_ = do
     -- qcLists <- QC.generate QC.arbitrary :: IO [Maybe [Int]]
-    qcLists <- return $ list 4 series :: IO [Maybe [Int]]
+    qcLists <- return $ list 4 series :: IO [(Maybe [Int], Int, Int)]
     -- scLists <- return $ list 5 series :: IO [Either Bool Int]
+    putStrLn (printf "Input size = %d" (length qcLists))
 
-    r <- evaluate $ force $ sortWithTreeDist qcLists
+    let r = sortWithTreeDist qcLists
 
-    putStrLn (printf "#sorted - #original = %d" (length r - length qcLists))
+    -- putStrLn (printf "#sorted - #original = %d" (length r - length qcLists))
     -- print ( analyze (Right (-24) :: Either Bool Int))
     -- print (convertDataAnalysis $ analyze (Left False :: Either Bool Int))
 

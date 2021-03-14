@@ -139,7 +139,7 @@ buildFunctionWrapper functions solutionType@FunctionSignature{_returnType} param
       printf "let executeWrapper %s = (Prelude.map (\\f -> f %s :: %s) [%s]) in" typed unwrp retType (intercalate ", " wrapperNames) :: String
 
 buildNotCrashProp :: String -> FunctionSignature -> String
-buildNotCrashProp solution funcSig = traceId $ formatNotCrashProp params wrapper
+buildNotCrashProp solution funcSig = formatNotCrashProp params wrapper
   where
     params@(plain, typed, analyses, unwrp) = showParams (_argsType funcSig)
 
