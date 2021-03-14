@@ -1,4 +1,5 @@
 {-# LANGUAGE FlexibleInstances, MultiParamTypeClasses, DeriveDataTypeable, LambdaCase, DeriveGeneric, DeriveAnyClass #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 module InternalTypeGen where
 
 import GHC.Generics (Generic)
@@ -9,10 +10,15 @@ import Control.Monad.Logic (liftM)
 import Data.Char (ord)
 import Data.Containers.ListUtils (nubOrd)
 import Data.Data (Data(..))
+import Data.IORef (readIORef, newIORef, modifyIORef', IORef(..))
 import Data.List (isInfixOf, elemIndex, nub, drop, reverse, intersect, intercalate)
 import Text.Printf (printf)
 import qualified Test.ChasingBottoms as CB
 import qualified Test.QuickCheck as QC
+
+import Test.QuickCheck
+import Test.QuickCheck.Property
+import Test.QuickCheck.Monadic
 
 defaultMaxOutputLength    = 50         :: CB.Nat
 defaultTimeoutMicro       = 400         :: Int
@@ -21,14 +27,12 @@ defaultCharRange          = ['a'..'d']  :: [Char]
 defaultFuncSpecialSize    = 4           :: Int
 defaultTestArgs           = QC.stdArgs {QC.chatty = False, QC.maxDiscardRatio = 1, QC.maxSuccess = 100, QC.maxSize = 7} :: QC.Args
 
-data InternalExample = InternalExample {
-    params :: [String],
-    analyses :: [DataAnalysis]
-} deriving(Eq, Show)
+newtype InternalExample = InternalExample [DataAnalysis] deriving (Show)
 
 data DataAnalysis =
   Instance  { typeName          :: String
             , constructorName   :: String
+            , expr              :: String
             , parameters        :: [DataAnalysis]
             , height            :: Int
             } deriving (Show, Eq, Generic, NFData)
@@ -60,12 +64,17 @@ anyDuplicate :: Ord a => [a] -> Bool
 anyDuplicate [x, y] = x == y
 anyDuplicate xs = length (nubOrd xs) /= length xs
 
-labelEvaluation :: (Data a, Analyze a, QC.Testable prop) => [String] -> [DataAnalysis] -> [a] -> ([CB.Result String] -> prop) -> IO QC.Property
-labelEvaluation inputs inputAnalyses values prop = do
-    outputs <- map splitResult <$> mapM (evaluateValue defaultTimeoutMicro) values
-    
-    let examples = map (\(a, b) -> InternalExample (inputs ++ [showCBResult a]) (inputAnalyses ++ [convertCBAnalysis b])) outputs
-    return $ QC.label (show examples) (prop $ map fst outputs)
+analyzeTop :: (Show a, Analyze a) => a -> DataAnalysis
+analyzeTop x = (analyze x) {expr = show x}
+
+storeEval :: (Data a, Analyze a, QC.Testable prop) => IORef [[InternalExample]] -> [DataAnalysis] -> [a] -> ([CB.Result String] -> prop) -> IO QC.Property
+storeEval storeRef inputs values prop = do
+    outputs <- mapM (liftM splitResult . evaluateValue defaultTimeoutMicro) values
+
+    let examples = map (\(expr, analysis) -> InternalExample (inputs ++ [(convertCBAnalysis analysis) {expr = showCBResult expr}])) outputs
+    modifyIORef' storeRef (\xss -> examples : xss)
+
+    return (QC.property $ prop $ map fst outputs)
   where
     evaluateValue :: (Data a, Analyze a) => Int -> a -> IO (CB.Result (String, DataAnalysis))
     evaluateValue timeInMicro x = CB.timeOutMicro timeInMicro $ liftM2 (,) (t x) (s x)
@@ -87,7 +96,7 @@ labelEvaluation inputs inputAnalyses values prop = do
                       CB.Exception ex -> show ex
 
     convertCBAnalysis :: CB.Result DataAnalysis -> DataAnalysis
-    convertCBAnalysis = \case CB.Value a -> a; _ -> Instance "error" "DNE" [] 0
+    convertCBAnalysis = \case CB.Value a -> a; _ -> Instance "error" "DNE" "" [] 0
 
 -- * Custom Datatype for Range Restriction
 newtype  MyInt = MyIntValue Int deriving (Eq, Data)
@@ -140,17 +149,26 @@ analyzeMany :: (AnalyzeManyType r) => r
 analyzeMany = amImpl []
 
 createInstance :: String -> String -> [DataAnalysis] -> DataAnalysis
-createInstance typeName constrName params = Instance typeName constrName params (maybe 0 (+1) (foldr max Nothing $ map (Just . height) params))
+createInstance typeName constrName params = Instance typeName constrName "" params (maybe 0 (+1) (foldr max Nothing $ map (Just . height) params))
 
 class                               Analyze a             where analyze :: a -> DataAnalysis
-instance                            Analyze Int           where analyze x = Instance "Int"  (show $ x `compare` 0)  [] 0
-instance                            Analyze Bool          where analyze x = Instance "Bool" (show x)                [] 0
-instance                            Analyze Char          where analyze x = Instance "Char" "_"                     [] 0
+instance                            Analyze Int           where analyze x = Instance "Int"  (show $ x `compare` 0) (show x) [] 0
+instance                            Analyze Bool          where analyze x = Instance "Bool" (show x)               (show x) [] 0
+instance                            Analyze Char          where analyze x = Instance "Char" "_"                    (show x) [] 0
 instance                            Analyze MyInt         where analyze = analyze . (unwrap :: MyInt -> Int)
 instance                            Analyze MyChar        where analyze = analyze . (unwrap :: MyChar -> Char)
-instance                            Analyze (MyFun a b)   where analyze = \case Generated _ -> Instance "Fun" "_" [] 0; Expression n _ -> Instance "Fun" n [] 0
+instance                            Analyze (a -> b)      where analyze = const (Instance "Fun" "_" "" [] 0)
+instance                            Analyze (MyFun a b)   where analyze = \case Generated _ -> Instance "Fun" "_" "" [] 0; Expression n _ -> Instance "Fun" n "" [] 0
 instance Analyze a              =>  Analyze (Box a)       where analyze = analyze . (\(BoxValue v) -> v)
 instance Analyze a              =>  Analyze [a]           where analyze = \case [] -> createInstance "List" "Nil" []; x:xs -> createInstance "List" "Cons" (analyzeMany x xs)
 instance Analyze a              =>  Analyze (Maybe a)     where analyze = maybe (createInstance "Maybe" "Nothing" []) (createInstance "Maybe" "Just" . analyzeMany)
 instance (Analyze a, Analyze b) =>  Analyze (Either a b)  where analyze = either (createInstance "Either" "Left" . analyzeMany) (createInstance "Either" "Right" . analyzeMany)
 instance (Analyze a, Analyze b) =>  Analyze (a, b)        where analyze (l, r) = createInstance "(,)" "," (analyzeMany l r)
+
+
+main_ :: IO (QC.Result, [[InternalExample]])
+main_ = 
+  let wrappedSolution = ((const 0) :: () => Int -> Int) in
+    let executeWrapper (arg_1 :: MyInt) = (Prelude.map (\f -> f (unwrap arg_1) :: Int) [wrappedSolution]) in
+      let prop_not_crash storeRef (arg_1) = monadicIO $ run $ storeEval storeRef ([(analyzeTop arg_1)]) (executeWrapper (arg_1)) (\out -> (not $ isFailedResult $ Prelude.head out) ==> True) in
+        newIORef [] >>= (\ioR -> liftM2 (,) (quickCheckWithResult defaultTestArgs (prop_not_crash ioR)) (readIORef ioR))

@@ -29,7 +29,7 @@ frameworkModules =
   ++ [("Test.ChasingBottoms", Just "CB")]
 
 type Candidate = String
-type BackendResult = Result
+type BackendResult = (Result, [[InternalExample]])
 type GeneratorResult = [Example]
 
 type AssociativeInternalExamples = [(Candidate, [InternalExample])]
