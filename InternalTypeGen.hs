@@ -1,5 +1,5 @@
 {-# LANGUAGE FlexibleInstances, MultiParamTypeClasses, DeriveDataTypeable, LambdaCase, DeriveGeneric, DeriveAnyClass #-}
-{-# LANGUAGE ScopedTypeVariables #-}
+-- {-# LANGUAGE ScopedTypeVariables #-}
 module InternalTypeGen where
 
 import GHC.Generics (Generic)
@@ -16,9 +16,9 @@ import Text.Printf (printf)
 import qualified Test.ChasingBottoms as CB
 import qualified Test.QuickCheck as QC
 
-import Test.QuickCheck
-import Test.QuickCheck.Property
-import Test.QuickCheck.Monadic
+-- import Test.QuickCheck
+-- import Test.QuickCheck.Property
+-- import Test.QuickCheck.Monadic
 
 defaultMaxOutputLength    = 50         :: CB.Nat
 defaultTimeoutMicro       = 400         :: Int
@@ -164,11 +164,3 @@ instance Analyze a              =>  Analyze [a]           where analyze = \case 
 instance Analyze a              =>  Analyze (Maybe a)     where analyze = maybe (createInstance "Maybe" "Nothing" []) (createInstance "Maybe" "Just" . analyzeMany)
 instance (Analyze a, Analyze b) =>  Analyze (Either a b)  where analyze = either (createInstance "Either" "Left" . analyzeMany) (createInstance "Either" "Right" . analyzeMany)
 instance (Analyze a, Analyze b) =>  Analyze (a, b)        where analyze (l, r) = createInstance "(,)" "," (analyzeMany l r)
-
-
-main_ :: IO (QC.Result, [[InternalExample]])
-main_ = 
-  let wrappedSolution = ((const 0) :: () => Int -> Int) in
-    let executeWrapper (arg_1 :: MyInt) = (Prelude.map (\f -> f (unwrap arg_1) :: Int) [wrappedSolution]) in
-      let prop_not_crash storeRef (arg_1) = monadicIO $ run $ storeEval storeRef ([(analyzeTop arg_1)]) (executeWrapper (arg_1)) (\out -> (not $ isFailedResult $ Prelude.head out) ==> True) in
-        newIORef [] >>= (\ioR -> liftM2 (,) (quickCheckWithResult defaultTestArgs (prop_not_crash ioR)) (readIORef ioR))

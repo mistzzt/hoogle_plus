@@ -148,7 +148,7 @@ buildNotCrashProp solution funcSig = traceId $ formatNotCrashProp params wrapper
 
     formatProp propName propBody (plain, typed, analyses, unwrp) wrappedSolution = unwords
       [ wrappedSolution
-      , printf "let storeRef %s %s = monadicIO $ run $ storeEval storeRef (%s) (executeWrapper %s) (%s) in" propName plain analyses plain propBody
+      , printf "let %s storeRef %s = monadicIO $ run $ storeEval storeRef (%s) (executeWrapper %s) (%s) in" propName plain analyses plain propBody
       , printf "newIORef [] >>= (\\storeRef -> liftM2 (,) (quickCheckWithResult defaultTestArgs (%s storeRef)) (readIORef storeRef)) " propName ] :: String
 
 buildDupCheckProp :: (String, [String]) -> FunctionSignature -> [String]
