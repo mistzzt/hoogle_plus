@@ -223,8 +223,8 @@ validateCandidate modules solution funcSig = do
     readResult r = case fst r of
       QC.GaveUp{QC.numTests}
             | numTests == 0 -> Invalid
-            | otherwise     -> (Partial . selectExamples . parseExamples) r
-      QC.Success{}          -> (Total . selectExamples . parseExamples) r
+            | otherwise     -> (Partial . selectExamples . concat . snd) r
+      QC.Success{}          -> (Total . selectExamples . concat . snd) r
       _                     -> trace (show r) Invalid
 
 -- >>> (evalStateT (classifyCandidate ["Data.Either", "GHC.List", "Data.Maybe", "Data.Function"] "\\e f -> Data.Either.either f (GHC.List.head []) e" (instantiateSignature $ parseTypeString "Either a b -> (a -> b) -> b") ["\\e f -> Data.Either.fromRight (f (Data.Maybe.fromJust Data.Maybe.Nothing)) e", "\\e f -> Data.Either.either f Data.Function.id e"]) emptyFilterState) :: IO CandidateDuplicateDesc
@@ -246,7 +246,7 @@ classifyCandidate modules candidate funcSig previousCandidates = if null previou
         QC.GaveUp {}                            -> assocs
         QC.Success {}                           -> assocs
       where
-        (examples, examplesForPrev) = splitConsecutive $ parseExamples result
+        (examples, examplesForPrev) = unzip $ map (\[current, previous] -> (current, previous)) (snd result)
         assocs = Just [(candidate, examples), (previousCandidate, examplesForPrev)]
 
     readInterpreterResult :: Candidate -> [Candidate] -> Either InterpreterError [BackendResult] -> [Maybe AssociativeInternalExamples]
@@ -313,10 +313,6 @@ showParams args = (plain, typed, analyses, unwrp)
 
     analyses =  "[" ++ intercalate ", " (formatIdx "(analyzeTop arg_%d)") ++ "]"
     formatIdx format = map ((printf format :: Int -> String) . fst) args'
-
--- | Parse Example string from QC.label to Example
-parseExamples :: BackendResult -> [InternalExample]
-parseExamples = concat . snd
 
 selectExamples :: [InternalExample] -> [InternalExample]
 selectExamples = take 5 . map (unpackNodes . fst) . sortWithTreeDistVar . map packNodes
