@@ -159,7 +159,7 @@ instance                            Analyze MyInt         where analyze = analyz
 instance                            Analyze MyChar        where analyze = analyze . (unwrap :: MyChar -> Char)
 instance                            Analyze (a -> b)      where analyze = const (Instance "Fun" "_" "" [] 0)
 instance                            Analyze (MyFun a b)   where analyze = \case Generated _ -> Instance "Fun" "_" "" [] 0; Expression n _ -> Instance "Fun" n "" [] 0
-instance Analyze a              =>  Analyze (Box a)       where analyze = analyze . (\(BoxValue v) -> v)
+instance Show a                 =>  Analyze (Box a)       where analyze x = Instance "Box" "_" (show x) [] 0
 instance Analyze a              =>  Analyze [a]           where analyze = \case [] -> createInstance "List" "Nil" []; x:xs -> createInstance "List" "Cons" (analyzeMany x xs)
 instance Analyze a              =>  Analyze (Maybe a)     where analyze = maybe (createInstance "Maybe" "Nothing" []) (createInstance "Maybe" "Just" . analyzeMany)
 instance (Analyze a, Analyze b) =>  Analyze (Either a b)  where analyze = either (createInstance "Either" "Left" . analyzeMany) (createInstance "Either" "Right" . analyzeMany)
