@@ -8,10 +8,12 @@ import Control.Monad.Logic (liftM)
 import Data.Char (ord)
 import Data.Containers.ListUtils (nubOrd)
 import Data.Data (Data(..))
-import Data.List (isInfixOf, elemIndex, nub, drop, reverse, intersect, intercalate, foldl')
+import Data.List (isInfixOf, elemIndex, nub, drop, reverse, intersect, intercalate, foldl', iterate')
 import Text.Printf (printf)
 import qualified Test.ChasingBottoms as CB
 import qualified Test.QuickCheck as QC
+import System.Random
+import System.IO.Unsafe
 
 import Test.SmallCheck
 import Test.SmallCheck.Series
@@ -122,6 +124,26 @@ sortWithTreeDist3 xs =
     step :: (Analyze a, Show a, Eq a) => ([(a, Int)], [(a)]) -> Int -> ([(a, Int)], [a])
     step (r, s) _ =
       let
+        s'  = map (\x -> (x, map (compareTwo x . fst) r)) (take 20 s)
+        s'' = map (second minimum) s'
+        p   = maximumBy (comparing snd) s''
+      in
+        (r ++ [p], s \\ [fst p])
+
+    compareTwo :: Analyze a => a -> a -> Int
+    compareTwo a b = customTreeDist (convertDataAnalysis $ analyze a) (convertDataAnalysis $ analyze b)
+
+sortWithTreeDist3' :: (Analyze a, Show a, Eq a) => [a] -> [(a, Int)]
+sortWithTreeDist3' xs =
+    let
+      r = [(minimumBy (comparing (height . analyze)) xs, 0)]
+      -- xs' = xs \\ [fst $ head r]
+    in
+      view _1 $ foldl' step (r, xs) [0..length xs - 1]
+  where
+    step :: (Analyze a, Show a, Eq a) => ([(a, Int)], [(a)]) -> Int -> ([(a, Int)], [a])
+    step (r, s) _ =
+      let
         s'  = map (\x -> (x, map (compareTwo x . fst) r)) s
         s'' = map (second minimum) s'
         p   = maximumBy (comparing snd) s''
@@ -131,60 +153,52 @@ sortWithTreeDist3 xs =
     compareTwo :: Analyze a => a -> a -> Int
     compareTwo a b = customTreeDist (convertDataAnalysis $ analyze a) (convertDataAnalysis $ analyze b)
 
-elementwiseSum :: Num a => [(a, a)] -> (a, a)
-elementwiseSum xs = bimap sum sum $ unzip xs
 
-sort :: (Analyze a, Show a, Eq a) => [a] -> Int -> [a]
-sort [] _ = []
-sort xs depth = view _1 $ foldl g (traceShowId [minimumBy (comparing (height . analyze)) xs], xs) [0..depth]
+sortStochastic :: (Analyze a, Show a, Eq a) => [a] -> Int -> [(a, Int)]
+sortStochastic xs seed =
+    let
+      r = [(minimumBy (comparing (height . analyze)) xs, 0)]
+    in
+      view _1 $ foldl' step (r, xs, mkStdGen seed) [0..length xs - 1]
   where
-    g :: (Analyze a, Show a, Eq a) => ([a], [a]) -> Int -> ([a], [a])
-    g (r, s) d =
-                  let s'  = map (\x' -> (map (\x -> compareData (analyze x) (analyze x') d True) r, x')) s
-                      s'' = (map (first elementwiseSum) $ filter (not . any isNoDiff . fst) s')
-                      p   = map last $ groupOn fst s''
-                      p'  = traceShowId (map snd $ sortOn fst p)
-                  in  (r ++ p', s \\ p')
+    step :: (Analyze a, Show a, Eq a, RandomGen g) => ([(a, Int)], [a], g) -> Int -> ([(a, Int)], [a], g)
+    step (r, s, gen) _ =
+      let
+        (idxs, gen')  = iterate' (\(idxs, gen) -> let (i, gen') = randomR (0 :: Int, length s - 1 :: Int) gen in (i:idxs, gen') ) ([], gen) !! 20
+        s'            = map ((\x -> (x, map (compareTwo x . fst) r)) . (!!) s) idxs
+        s''           = map (second minimum) s'
+        p             = maximumBy (comparing snd) s''
+      in
+        (r ++ [p], s \\ [fst p], gen')
 
-
-
-    groupOn :: (Ord b) => (a -> b) -> [a] -> [[a]]
-    groupOn f =
-      let unpack = fmap snd . Map.toList
-          fld m a = case Map.lookup (f a) m of
-            Nothing -> Map.insert (f a) [a] m
-            Just as -> Map.insert (f a) (a:as) m
-      in unpack . foldl fld Map.empty
-
-    isNoDiff :: (Int, Int) -> Bool
-    isNoDiff = (==) (0, 0)
-
-
-compareData :: DataAnalysis -> DataAnalysis -> Int -> Bool -> (Int, Int)
-compareData (Instance xt xc _ xps _) (Instance _ yc _ yps _) depth isRecType = case depth of
-        0 -> createResult (if xc == yc then 0 else 1) isRecType
-        n -> if xc /= yc
-            then createResult 1 isRecType
-            else elementwiseSum $ zipWith (\x y -> compareData x y (depth - 1) (testRecType xt x)) xps yps
-
-    where
-        createResult r isRecType = if isRecType then (r, 0) else (0, r)
-        testRecType parentTypeName (Instance t _ _ _ _) = t == parentTypeName
+    compareTwo :: Analyze a => a -> a -> Int
+    compareTwo a b = customTreeDist (convertDataAnalysis $ analyze a) (convertDataAnalysis $ analyze b)
 
 sortWithTreeDist :: (Analyze a, Show a, Eq a) => [a] -> [(a, Int)]
 sortWithTreeDist = sortWithTreeDist3
 
 main_ = do
-    -- qcLists <- QC.generate QC.arbitrary :: IO [Maybe [Int]]
-    qcLists <- return $ list 4 series :: IO [(Maybe [Int], Int, Int)]
+    -- qcLists <- QC.generate QC.arbitrary :: IO [(Maybe [Int], Int, Int)]
+    -- qcLists <- return $ list 5 series :: IO [(Maybe [Int], Int, Int)]
+    let qcLists = [Left False, Right "abc", Right "d", Left True, Right ""]
+    seed <- QC.generate QC.arbitrary :: IO Int
     -- scLists <- return $ list 5 series :: IO [Either Bool Int]
     putStrLn (printf "Input size = %d" (length qcLists))
 
-    let r = sortWithTreeDist qcLists
+    -- consider the complete set
+    let r  = sortWithTreeDist3' qcLists
+    -- subset
+    let pr = sortWithTreeDist qcLists
+    -- stochastic
+    let sr = sortStochastic qcLists seed
 
     -- putStrLn (printf "#sorted - #original = %d" (length r - length qcLists))
     -- print ( analyze (Right (-24) :: Either Bool Int))
     -- print (convertDataAnalysis $ analyze (Left False :: Either Bool Int))
 
-    putStrLn (printf "Input: \t%s" (show qcLists))
-    putStrLn (printf "Result: %s" (show r))
+    putStrLn (printf "Input: \t%s" (show (take 10 qcLists)))
+    putStrLn (printf "Subset: %s" (show (take 10 pr)))
+    putStrLn (printf "Stochastic: %s" (show (take 10 sr)))
+    putStrLn (printf "Complete: %s" (show (take 10 r)))
+
+

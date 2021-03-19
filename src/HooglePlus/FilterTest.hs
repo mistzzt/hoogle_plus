@@ -315,7 +315,7 @@ showParams args = (plain, typed, analyses, unwrp)
     formatIdx format = map ((printf format :: Int -> String) . fst) args'
 
 selectExamples :: [InternalExample] -> [InternalExample]
-selectExamples = take 5 . map (unpackNodes . fst) . sortWithTreeDistVar . map packNodes
+selectExamples = take 10 . map (unpackNodes . fst) . sortWithTreeDistVar . map packNodes
   where
     packNodes :: InternalExample -> DataAnalysis
     packNodes (InternalExample dts) = Instance "Root" "!" "" dts (1 + maximum (map height dts))
