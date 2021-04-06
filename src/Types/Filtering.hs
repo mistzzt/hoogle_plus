@@ -1,11 +1,13 @@
-{-# LANGUAGE LambdaCase, DeriveDataTypeable #-}
+{-# LANGUAGE LambdaCase, DeriveDataTypeable, DeriveGeneric #-}
 module Types.Filtering where
 
-import Control.Exception
-import Control.Monad.State
+import Control.Exception ( Exception )
+import Control.Monad.State ( StateT )
 import Data.List (groupBy, intercalate, nubBy)
-import Data.Typeable
-import Text.Printf
+import Data.Hashable ( Hashable )
+import Data.Typeable ( Typeable )
+import GHC.Generics ( Generic )
+import Text.Printf ( printf )
 import Test.QuickCheck (Result)
 import qualified Data.Map as Map
 
@@ -41,7 +43,9 @@ data DataAnalysis =
             , expr              :: String
             , parameters        :: [DataAnalysis]
             , height            :: Int
-            } deriving (Show, Eq, Read)
+            } deriving (Show, Eq, Read, Generic)
+
+instance Hashable DataAnalysis
 
 
 instance Show InternalExample where
