@@ -1,12 +1,11 @@
-{-# LANGUAGE LambdaCase, DeriveDataTypeable, DeriveGeneric #-}
+{-# LANGUAGE LambdaCase, DeriveDataTypeable, NamedFieldPuns #-}
 module Types.Filtering where
 
 import Control.Exception ( Exception )
 import Control.Monad.State ( StateT )
 import Data.List (groupBy, intercalate, nubBy)
-import Data.Hashable ( Hashable )
-import Data.Typeable ( Typeable )
-import GHC.Generics ( Generic )
+import Data.Hashable ( Hashable(hashWithSalt) )
+import Data.Typeable
 import Text.Printf ( printf )
 import Test.QuickCheck (Result)
 import qualified Data.Map as Map
@@ -43,10 +42,12 @@ data DataAnalysis =
             , expr              :: String
             , parameters        :: [DataAnalysis]
             , height            :: Int
-            } deriving (Show, Eq, Read, Generic)
+            } deriving (Show, Eq, Read)
 
-instance Hashable DataAnalysis
-
+instance Hashable DataAnalysis where
+  hashWithSalt salt Instance {constructorName, parameters} =
+    salt `hashWithSalt`
+    constructorName `hashWithSalt` parameters
 
 instance Show InternalExample where
     show (InternalExample params) = unwords [unwords (map expr $ init params), "-->", expr $ last params]
