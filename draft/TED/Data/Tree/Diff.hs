@@ -3,19 +3,16 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 module TED.Data.Tree.Diff where
 
-import           Control.Monad.State
-import           Data.Bifunctor
-import           Data.List           as L
+import Control.Monad.State ( evalState, State, MonadState(state) )
+import Data.Bifunctor ( Bifunctor(bimap, first) )
+import Data.List as L ( null )
 import           Data.Map            (Map)
 import qualified Data.Map            as M
-import           Data.Maybe
-import           Data.Monoid
+import Data.Maybe ( fromJust, fromMaybe )
 import           Data.Vector         (Vector)
 import qualified Data.Vector         as V
 
 import TED.Data.Tree
-
-import Debug.Trace
 
 -- * Flattened Trees
 
