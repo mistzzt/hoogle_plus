@@ -7,6 +7,7 @@ import Data.Bifunctor ( Bifunctor(second) )
 import Data.Functor
 import Data.Hashable ( Hashable(hash) )
 import Data.List (sortOn, sortBy, (\\), maximumBy, minimumBy, foldl', iterate', sort, unfoldr)
+import Data.List.Extra (groupOn)
 import Data.Ord ( comparing )
 import qualified Data.Map as Map
 import System.IO.Unsafe (unsafePerformIO)
@@ -27,12 +28,13 @@ type CachedTed m = StateT CachedTedState m
 compareDataAnalyses :: Monad m => (DataAnalysis -> DataAnalysis) -> DataAnalysis -> DataAnalysis -> CachedTed m Int
 compareDataAnalyses f a b = do
     cache <- get
-    let [hashL, hashR] = sort [hash a, hash b]
+    let (a', b') = (f a, f b)
+    let [hashL, hashR] = sort [hash a', hash b']
     let key = (hashL, hashR)
     case Map.lookup key cache of
       Just v -> return v
       Nothing -> do
-        let v = customTreeDist (convertDataAnalysis $ f a) (convertDataAnalysis $ f b)
+        let v = customTreeDist (convertDataAnalysis a') (convertDataAnalysis b')
         modify $ \c -> Map.insert key v c
         return v
 
@@ -76,19 +78,9 @@ simpleSortBy f xs =
       return (r ++ [p], s \\ [fst p])
 
 tierSortBy :: Monad m => TierExampleSorter m
-tierSortBy f xs =
-    let
-      r = [minimumBy (comparing height) xs]
-    in
-      filter (not . null) . view _3 <$> foldM (step id) (r, xs, []) [0..length xs - 1]
-  where
-    step :: Monad m => (DataAnalysis -> DataAnalysis) -> ([DataAnalysis], [DataAnalysis], [[DataAnalysis]]) -> Int -> CachedTed m ([DataAnalysis], [DataAnalysis], [[DataAnalysis]])
-    step f (r, s, tiers) _ = do
-      s' <- mapM (\x -> fmap (x,) (mapM (compareDataAnalyses f x) r)) s
-      let s'' = map (second minimum) s'
-      let i   = take 5 $ map fst $ sortOn (negate . snd) s''
-      let p   = head i
-      return (r ++ [p], s \\ i, i : tiers)
+tierSortBy f xs = do
+    let r = minimumBy (comparing height) xs
+    map (map fst) . groupOn snd . sortOn snd <$> mapM (\x -> fmap (x,) (compareDataAnalyses f r x)) xs
 
 cherryPickByOutput :: Monad m => ExampleSorter m -> TierExampleSorter m -> [DataAnalysis] -> CachedTed m [DataAnalysis]
 cherryPickByOutput g f xs = do
