@@ -13,7 +13,7 @@ import Control.Exception
 import Control.Monad
 import Control.Monad.State
 import Data.Functor ((<&>))
-import Data.Bifunctor (second)
+import Data.Bifunctor (second, bimap)
 import Data.Either
 import Data.List
 import Data.Maybe
@@ -223,8 +223,8 @@ validateCandidate modules solution funcSig = do
     readResult r = case fst r of
       QC.GaveUp{QC.numTests}
             | numTests == 0 -> Invalid
-            | otherwise     -> (Partial . selectExamples . concat . snd) r
-      QC.Success{}          -> (Total . selectExamples . concat . snd) r
+            | otherwise     -> (uncurry Partial . selectExamples . concat . snd) r
+      QC.Success{}          -> (uncurry Total . selectExamples . concat . snd) r
       _                     -> trace (show r) Invalid
 
 -- >>> (evalStateT (classifyCandidate ["Data.Either", "GHC.List", "Data.Maybe", "Data.Function"] "\\e f -> Data.Either.either f (GHC.List.head []) e" (instantiateSignature $ parseTypeString "Either a b -> (a -> b) -> b") ["\\e f -> Data.Either.fromRight (f (Data.Maybe.fromJust Data.Maybe.Nothing)) e", "\\e f -> Data.Either.either f Data.Function.id e"]) emptyFilterState) :: IO CandidateDuplicateDesc
@@ -314,8 +314,8 @@ showParams args = (plain, typed, analyses, unwrp)
     analyses =  "[" ++ intercalate ", " (formatIdx "(analyzeTop arg_%d)") ++ "]"
     formatIdx format = map ((printf format :: Int -> String) . fst) args'
 
-selectExamples :: [InternalExample] -> [InternalExample]
-selectExamples = take 10 . map (unpackNodes . fst) . sortWithTreeDistVar . map packNodes
+selectExamples :: [InternalExample] -> ([InternalExample], [[InternalExample]])
+selectExamples = bimap (map unpackNodes) (map (map unpackNodes)) . sortWithTreeDistVar . map packNodes -- take 10 . map (unpackNodes . fst) . sortWithTreeDistVar . map packNodes
   where
     packNodes :: InternalExample -> DataAnalysis
     packNodes (InternalExample dts) = Instance "Root" "!" "" dts (1 + maximum (map height dts))
@@ -429,3 +429,12 @@ prepareEnvironment funcSig = do
 
     buildExpression :: ArgumentType -> String -> String
     buildExpression tipe expr = printf "wrap ((%s) :: %s)" expr (show tipe)
+
+
+-- generateSimilarExamples :: MonadIO m => FunctionSignature -> InternalExample -> FilterTest m [[InternalExample]]
+-- generateSimilarExamples funcSig ex = do
+--     return []
+--   where
+--     (plain, typed, analyses, unwrp) = showParams (_argsType funcSig)
+--     -- prop = unwords
+--     --   [ printf "let prop_similar_example storeRef %s = sortWithTreeDistVar" ]

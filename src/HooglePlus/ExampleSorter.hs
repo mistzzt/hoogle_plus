@@ -1,9 +1,10 @@
-{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE FlexibleContexts, TupleSections #-}
 module HooglePlus.ExampleSorter (sortWithTreeDistVar) where
 
 import Control.Lens ( view, Field1(_1) )
 import Control.Monad.State ( foldM, modify, evalState, MonadState(get), StateT )
 import Data.Bifunctor ( Bifunctor(second) )
+import Data.Functor
 import Data.Hashable ( Hashable(hash) )
 import Data.List (sortOn, sortBy, (\\), maximumBy, minimumBy, foldl', iterate', sort, unfoldr)
 import Data.Ord ( comparing )
@@ -37,8 +38,8 @@ compareDataAnalyses f a b = do
 subsetSize :: Int
 subsetSize = 10
 
-sortWithTreeDistVar :: [DataAnalysis] -> [(DataAnalysis, Int)]
-sortWithTreeDistVar xs = evalState (sortWithTreeDistVar_ xs) Map.empty
+sortWithTreeDistVar :: [DataAnalysis] -> ([DataAnalysis], [[DataAnalysis]])
+sortWithTreeDistVar xs = evalState (previewSimilarExamples sortWithTreeDistVar_ xs 10) Map.empty
 
 sortWithTreeDistVar_ :: Monad m => [DataAnalysis] -> CachedTed m [(DataAnalysis, Int)]
 sortWithTreeDistVar_ = simpleSortBy id
@@ -46,6 +47,15 @@ sortWithTreeDistVar_ = simpleSortBy id
 -- stochasticSimpleSortBy id
 -- cherryPickByOutput simpleSortBy
 -- cherryPickByOutput stochasticSimpleSortBy
+
+previewSimilarExamples :: Monad m => ([DataAnalysis] -> CachedTed m [(DataAnalysis, Int)]) -> [DataAnalysis] -> Int -> CachedTed m ([DataAnalysis], [[DataAnalysis]])
+previewSimilarExamples f xs n = do
+    sorted <- take n . map fst <$> f xs
+    mapM (`findSimilar` xs) sorted <&> (sorted,)
+  where
+    findSimilar :: Monad m => DataAnalysis -> [DataAnalysis] -> CachedTed m [DataAnalysis]
+    findSimilar x xs = take n . map fst . sortOn snd <$> mapM (\e -> (e,) <$> compareDataAnalyses id x e) (xs \\ [x])
+
 
 simpleSortBy :: Monad m => ExampleSorter m
 simpleSortBy f xs =
@@ -56,7 +66,7 @@ simpleSortBy f xs =
   where
     step :: Monad m => (DataAnalysis -> DataAnalysis) -> ([(DataAnalysis, Int)], [DataAnalysis]) -> Int -> CachedTed m ([(DataAnalysis, Int)], [DataAnalysis])
     step f (r, s) _ = do
-      s' <- mapM (\x -> fmap ((,) x) (mapM (compareDataAnalyses f x . fst) r)) s
+      s' <- mapM (\x -> fmap (x,) (mapM (compareDataAnalyses f x . fst) r)) s
       let s'' = map (second minimum) s'
       let p   = maximumBy (comparing snd) s''
       return (r ++ [p], s \\ [fst p])
@@ -71,7 +81,7 @@ stochasticSimpleSortBy f xs =
     step :: (RandomGen g, Monad m) => (DataAnalysis -> DataAnalysis) -> ([(DataAnalysis, Int)], [DataAnalysis], g) -> Int -> CachedTed m ([(DataAnalysis, Int)], [DataAnalysis], g)
     step f (r, s, gen) _ = do
       let (idxs, gen') = rolls (0, length s - 1) subsetSize gen
-      s' <- mapM ((\x -> fmap ((,) x) (mapM (compareDataAnalyses f x . fst) r)) . (!!) s) idxs
+      s' <- mapM ((\x -> fmap (x,) (mapM (compareDataAnalyses f x . fst) r)) . (!!) s) idxs
       let p  =  maximumBy (comparing snd) $ map (second minimum) s'
       return (r ++ [p], s \\ [fst p], gen')
 
@@ -79,7 +89,8 @@ stochasticSimpleSortBy f xs =
     rolls r n g = iterate' (\(idxs, gen) -> let (i, gen') = randomR r gen in (i:idxs, gen') ) ([], g) !! n
 
 cherryPickByOutput :: Monad m => ExampleSorter m -> [DataAnalysis] -> CachedTed m [(DataAnalysis, Int)]
-cherryPickByOutput f xs = f (last . parameters) xs >>= f (\x -> x {parameters = (init . parameters) x}) . map (view _1) . take 10
+cherryPickByOutput f = f (\x -> x {parameters = (init . parameters) x}) . take 10
+-- cherryPickByOutput f xs = f (last . parameters) xs >>= f (\x -> x {parameters = (init . parameters) x}) . map (view _1) . take 10
 
 -- sortWithTreeDistVarStochOnResult :: [DataAnalysis] -> [(DataAnalysis, Int)]
 -- sortWithTreeDistVarStochOnResult xs =

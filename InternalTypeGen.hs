@@ -1,5 +1,5 @@
 {-# LANGUAGE FlexibleInstances, MultiParamTypeClasses, DeriveDataTypeable, LambdaCase, DeriveGeneric, DeriveAnyClass #-}
--- {-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE NamedFieldPuns #-}
 module InternalTypeGen where
 
 import GHC.Generics (Generic)
@@ -15,6 +15,9 @@ import Data.List (isInfixOf, elemIndex, nub, drop, reverse, intersect, intercala
 import Text.Printf (printf)
 import qualified Test.ChasingBottoms as CB
 import qualified Test.QuickCheck as QC
+
+import qualified Data.Vector         as V
+import InternalTed
 
 -- import Test.QuickCheck
 -- import Test.QuickCheck.Property
@@ -164,3 +167,53 @@ instance Analyze a              =>  Analyze [a]           where analyze = \case 
 instance Analyze a              =>  Analyze (Maybe a)     where analyze = maybe (createInstance "Maybe" "Nothing" []) (createInstance "Maybe" "Just" . analyzeMany)
 instance (Analyze a, Analyze b) =>  Analyze (Either a b)  where analyze = either (createInstance "Either" "Left" . analyzeMany) (createInstance "Either" "Right" . analyzeMany)
 instance (Analyze a, Analyze b) =>  Analyze (a, b)        where analyze (l, r) = createInstance "(,)" "," (analyzeMany l r)
+
+-- ***                          *** --
+-- *** Similar Example Generation * --
+-- ***                          *** --
+
+-- convertDataAnalysis :: DataAnalysis -> Tree String
+-- convertDataAnalysis Instance {constructorName, parameters} = n constructorName (map convertDataAnalysis parameters)
+--   where n :: l -> [Tree l] -> Tree l
+--         n l cs = Node l (Forest $ V.fromList cs)
+
+-- storeGenerate :: (Analyze a, Data a) => IORef [InternalExample] -> DataAnalysis -> [DataAnalysis] -> a -> IO Bool
+-- storeGenerate storeRef preEx paramAnalyses value = do
+--     (outExpr, outAnalysis) <- splitResult <$> evaluateValue defaultTimeoutMicro value
+
+--     let distance = customTreeDist (convertDataAnalysis ) (convertDataAnalysis analysis')
+--     let example = InternalExample $ inputs ++ [analysis' {expr = showCBResult expr}]
+
+--     if distance < 2
+--       then modifyIORef' storeRef (\xss -> example : xss) >> return True
+--       else modifyIORef' storeRef (\xss -> example : xss) >> return False
+--   where
+--     evaluateValue :: (Data a, Analyze a) => Int -> a -> IO (CB.Result (String, DataAnalysis))
+--     evaluateValue timeInMicro x = CB.timeOutMicro timeInMicro $ liftM2 (,) (t x) (s x)
+--       where
+--         t = evaluate . force . CB.approxShow defaultMaxOutputLength
+--         s = evaluate . force . analyze -- evaluate only evaluates to weak head normal form
+
+--     splitResult :: CB.Result (a, b) -> (CB.Result a, CB.Result b)
+--     splitResult = \case
+--       CB.Value (a, b) -> (CB.Value a, CB.Value b)
+--       CB.NonTermination -> (CB.NonTermination, CB.NonTermination)
+--       CB.Exception ex -> (CB.Exception ex, CB.Exception ex)
+
+--     showCBResult :: CB.Result String -> String
+--     showCBResult = \case
+--                       CB.Value a | "_|_" `isInfixOf` a -> "bottom"
+--                       CB.Value a -> a
+--                       CB.NonTermination -> "diverge"
+--                       CB.Exception ex -> show ex
+
+--     convertCBAnalysis :: CB.Result DataAnalysis -> DataAnalysis
+--     convertCBAnalysis = \case CB.Value a -> a; _ -> Instance "error" "DNE" "" [] 0
+
+--     packNodes :: [DataAnalysis] -> DataAnalysis
+--     packNodes xs = Instance [] [] [] xs 0
+
+-- main_ = 
+--   let f = (+) :: (Int -> Int -> Int) in
+--     let prop_gen storeRef a b = monadicIO $ run $ storeGenerate storeRef [analyze (3 :: Int), analyze (0 :: Int)] (analyze (4 :: Int)) (f a b) in
+--       newIORef [] >>= (\s -> liftM2 (,) (quickCheckWithResult defaultTestArgs (prop_gen s)) (readIORef s))
