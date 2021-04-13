@@ -5,7 +5,7 @@ module InternalTypeGen where
 import GHC.Generics (Generic)
 import Control.DeepSeq (force, NFData(..))
 import Control.Exception (evaluate)
-import Control.Monad (liftM2)
+import Control.Monad (liftM2, when)
 import Control.Monad.Logic (liftM)
 import Data.Char (ord)
 import Data.Containers.ListUtils (nubOrd)
@@ -70,14 +70,16 @@ anyDuplicate xs = length (nubOrd xs) /= length xs
 analyzeTop :: (Show a, Analyze a) => a -> DataAnalysis
 analyzeTop x = (analyze x) {expr = show x}
 
-storeEval :: (Data a, Analyze a, QC.Testable prop) => IORef [[InternalExample]] -> [DataAnalysis] -> [a] -> ([CB.Result String] -> prop) -> IO QC.Property
-storeEval storeRef inputs values prop = do
+storeEval :: (Data a, Analyze a) => IORef [[InternalExample]] -> [DataAnalysis] -> [a] -> ([CB.Result String] -> Bool) -> Bool -> IO QC.Property
+storeEval storeRef inputs values prop includeFailed = do
     outputs <- mapM (liftM splitResult . evaluateValue defaultTimeoutMicro) values
 
     let examples = map (\(expr, analysis) -> InternalExample (inputs ++ [(convertCBAnalysis analysis) {expr = showCBResult expr}])) outputs
-    modifyIORef' storeRef (\xss -> examples : xss)
+    let propTest = prop $ map fst outputs
+    when (includeFailed || propTest)
+      (modifyIORef' storeRef (\xss -> examples : xss))
 
-    return (QC.property $ prop $ map fst outputs)
+    return (propTest QC.==> True)
   where
     evaluateValue :: (Data a, Analyze a) => Int -> a -> IO (CB.Result (String, DataAnalysis))
     evaluateValue timeInMicro x = CB.timeOutMicro timeInMicro $ liftM2 (,) (t x) (s x)

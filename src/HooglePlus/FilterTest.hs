@@ -144,11 +144,11 @@ buildNotCrashProp solution funcSig = formatNotCrashProp params wrapper
     params@(plain, typed, analyses, unwrp) = showParams (_argsType funcSig)
 
     wrapper = buildFunctionWrapper [("wrappedSolution", solution)] funcSig params
-    formatNotCrashProp = formatProp "prop_not_crash" "\\out -> (not $ isFailedResult $ Prelude.head out) ==> True"
+    formatNotCrashProp = formatProp "prop_not_crash" "not . isFailedResult . Prelude.head"-- "\\out -> (not $ isFailedResult $ Prelude.head out) ==> True"
 
     formatProp propName propBody (plain, typed, analyses, unwrp) wrappedSolution = unwords
       [ wrappedSolution
-      , printf "let %s storeRef %s = monadicIO $ run $ storeEval storeRef (%s) (executeWrapper %s) (%s) in" propName plain analyses plain propBody
+      , printf "let %s storeRef %s = monadicIO $ run $ storeEval storeRef (%s) (executeWrapper %s) (%s) True in" propName plain analyses plain propBody
       , printf "newIORef [] >>= (\\storeRef -> liftM2 (,) (quickCheckWithResult defaultTestArgs (%s storeRef)) (readIORef storeRef)) " propName ] :: String
 
 buildDupCheckProp :: (String, [String]) -> FunctionSignature -> [String]
@@ -165,7 +165,7 @@ buildDupCheckProp' (sol, otherSols) funcSig = unwords [wrapper, formatProp]
     solutions = zip [printf "result_%d" x :: String | x <- [0..] :: [Int]] (sol:otherSols)
 
     formatProp = unwords
-      [ printf "let prop_duplicate storeRef %s = monadicIO $ run $ storeEval storeRef (%s) (executeWrapper %s) (\\out -> (not $ anyDuplicate out) ==> True) in" plain analyses plain
+      [ printf "let prop_duplicate storeRef %s = monadicIO $ run $ storeEval storeRef (%s) (executeWrapper %s) (not . anyDuplicate) False in" plain analyses plain
       , printf "newIORef [] >>= (\\storeRef -> liftM2 (,) (quickCheckWithResult defaultTestArgs (prop_duplicate storeRef)) (readIORef storeRef))" ] :: String -- todo: fixme
 
 -- | Run Hint with the default script loaded.
@@ -228,6 +228,7 @@ validateCandidate modules solution funcSig = do
       _                     -> trace (show r) Invalid
 
 -- >>> (evalStateT (classifyCandidate ["Data.Either", "GHC.List", "Data.Maybe", "Data.Function"] "\\e f -> Data.Either.either f (GHC.List.head []) e" (instantiateSignature $ parseTypeString "Either a b -> (a -> b) -> b") ["\\e f -> Data.Either.fromRight (f (Data.Maybe.fromJust Data.Maybe.Nothing)) e", "\\e f -> Data.Either.either f Data.Function.id e"]) emptyFilterState) :: IO CandidateDuplicateDesc
+-- >>> (evalStateT (classifyCandidate ["GHC.List", "Data.List"] "\\xs -> GHC.List.map GHC.List.head $ Data.List.group xs" (instantiateSignature $ parseTypeString "Eq a => [a] -> [a]") ["id"]) emptyFilterState) :: IO CandidateDuplicateDesc
 classifyCandidate :: MonadIO m => [String] -> Candidate -> FunctionSignature -> [Candidate] -> FilterTest m CandidateDuplicateDesc
 classifyCandidate modules candidate funcSig previousCandidates = if null previousCandidates then return (New []) else do
     let properties    =   buildDupCheckProp (candidate, previousCandidates) funcSig
@@ -286,14 +287,15 @@ checkSolutionNotCrash modules funcSig solution = do
 checkDuplicates :: MonadIO m => [String] -> FunctionSignature -> String -> FilterTest m Bool
 checkDuplicates modules funcSig candidate = do
   FilterState previousCandidates _ _ _ _ <- get
-  result <- classifyCandidate modules candidate funcSig previousCandidates
+  let minimalCandidates = fromMaybe [] $ Map.lookup (show funcSig) minimalFunctions
+  result <- classifyCandidate modules candidate funcSig (minimalCandidates ++ previousCandidates)
 
   case result of
     DuplicateOf _ -> return False
     New assocExamples -> do
       modify $ \s -> s {
         solutions             = candidate : solutions s,
-        differentiateExamples = Map.unionWith (++) (differentiateExamples s) (Map.fromList assocExamples)
+        differentiateExamples = Map.unionWith (++) (differentiateExamples s) (foldr Map.delete (Map.fromList assocExamples) minimalCandidates)
       }
 
       return True

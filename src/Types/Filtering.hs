@@ -27,6 +27,10 @@ frameworkModules =
 
   ++ [("Test.ChasingBottoms", Just "CB")]
 
+minimalFunctions = Map.fromList [
+    ("() => [Int] -> [Int]", ["id"])
+  ]
+
 type Candidate = String
 type BackendResult = (Result, [[InternalExample]])
 type GeneratorResult = [Example]
