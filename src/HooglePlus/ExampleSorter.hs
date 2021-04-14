@@ -3,6 +3,7 @@ module HooglePlus.ExampleSorter (sortWithTreeDistVar) where
 
 import Control.Lens ( view, Field1(_1), Field2(_2), Field3(_3) )
 import Control.Monad.State ( foldM, modify, evalState, MonadState(get), StateT )
+import Control.Monad ( filterM )
 import Data.Bifunctor ( Bifunctor(second) )
 import Data.Functor
 import Data.Hashable ( Hashable(hash) )
@@ -53,7 +54,8 @@ sortWithTreeDistVar_ = simpleSortBy id
 
 work :: Monad m => [DataAnalysis] -> CachedTed m ([DataAnalysis], [[DataAnalysis]])
 -- work xs = previewSimilarExamples (stochasticSimpleSortBy id) xs 10
-work xs = (\x -> (x, map (const []) x)) <$> cherryPickByOutput stochasticSimpleSortBy tierSortBy xs -- previewSimilarExamples sortWithTreeDistVar_ xs 10
+work xs = previewSignificantExamples (stochasticSimpleSortBy id) xs 10
+-- work xs = (\x -> (x, map (const []) x)) <$> cherryPickByOutput stochasticSimpleSortBy tierSortBy xs -- previewSimilarExamples sortWithTreeDistVar_ xs 10
 
 previewSimilarExamples :: Monad m => ([DataAnalysis] -> CachedTed m [(DataAnalysis, Int)]) -> [DataAnalysis] -> Int -> CachedTed m ([DataAnalysis], [[DataAnalysis]])
 previewSimilarExamples f xs n = do
@@ -63,6 +65,20 @@ previewSimilarExamples f xs n = do
     findSimilar :: Monad m => DataAnalysis -> [DataAnalysis] -> CachedTed m [DataAnalysis]
     findSimilar x xs = take n . map fst . sortOn snd <$> mapM (\e -> (e,) <$> compareDataAnalyses id x e) (xs \\ [x])
 
+previewSignificantExamples :: Monad m => ([DataAnalysis] -> CachedTed m [(DataAnalysis, Int)]) -> [DataAnalysis] -> Int -> CachedTed m ([DataAnalysis], [[DataAnalysis]])
+previewSignificantExamples f xs n = do
+    sorted <- take n . map fst <$> f xs
+    mapM (`findSignificant` xs) sorted <&> (sorted,)
+
+  where
+    findSignificant :: Monad m => DataAnalysis -> [DataAnalysis] -> CachedTed m [DataAnalysis]
+    findSignificant x src = filterM (isSignificant x) src
+
+    isSignificant :: Monad m => DataAnalysis -> DataAnalysis -> CachedTed m Bool
+    isSignificant x x' = do
+      inputDiff <- compareDataAnalyses (\i -> i {parameters = (init . parameters) i}) x x'
+      outputDiff <- compareDataAnalyses (last . parameters) x x'
+      return (inputDiff < outputDiff && outputDiff > 2)
 
 simpleSortBy :: Monad m => ExampleSorter m
 simpleSortBy f xs =
