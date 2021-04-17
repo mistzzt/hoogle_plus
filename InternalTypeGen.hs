@@ -8,7 +8,6 @@ import Control.Exception (evaluate)
 import Control.Monad (liftM2, when)
 import Control.Monad.Logic (liftM)
 import Data.Char (ord)
-import Data.Containers.ListUtils (nubOrd)
 import Data.Data (Data(..))
 import Data.IORef (readIORef, newIORef, modifyIORef', IORef(..))
 import Data.List (isInfixOf, elemIndex, nub, drop, reverse, intersect, intercalate)
@@ -46,15 +45,6 @@ instance Eq a => Eq (CB.Result a) where
   (CB.Exception _) == (CB.Exception _) = True
   _ == _ = False
 
-instance Ord a => Ord (CB.Result a) where
-  (CB.Value a) `compare` (CB.Value b) = a `compare` b
-  (CB.Value _) `compare` _ = GT
-  (CB.Exception _) `compare` (CB.Exception _) = EQ
-  (CB.Exception _) `compare` (CB.Value _) = LT
-  (CB.Exception _) `compare` _ = GT
-  (CB.NonTermination) `compare` (CB.NonTermination) = EQ
-  (CB.NonTermination) `compare` _ = LT
-
 isFailedResult :: CB.Result String -> Bool
 isFailedResult result = case result of
   CB.NonTermination -> True
@@ -63,9 +53,9 @@ isFailedResult result = case result of
   CB.Value a | "Exception" `isInfixOf` a -> True
   _ -> False
 
-anyDuplicate :: Ord a => [a] -> Bool
+anyDuplicate :: Eq a => [a] -> Bool
 anyDuplicate [x, y] = x == y
-anyDuplicate xs = length (nubOrd xs) /= length xs
+anyDuplicate xs = length (nub xs) /= length xs
 
 analyzeTop :: (Show a, Analyze a) => a -> DataAnalysis
 analyzeTop x = (analyze x) {expr = show x}
@@ -85,7 +75,7 @@ storeEval storeRef inputs values prop includeFailed = do
     evaluateValue timeInMicro x = CB.timeOutMicro timeInMicro $ liftM2 (,) (t x) (s x)
       where
         t = evaluate . force . CB.approxShow defaultMaxOutputLength
-        s = evaluate . force . analyze -- evaluate only evaluates to weak head normal form
+        s = fmap preprocess . evaluate . force . approxAnalysis defaultMaxOutputLength . analyze -- evaluate only evaluates to weak head normal form
 
     splitResult :: CB.Result (a, b) -> (CB.Result a, CB.Result b)
     splitResult = \case
@@ -154,7 +144,7 @@ analyzeMany :: (AnalyzeManyType r) => r
 analyzeMany = amImpl []
 
 createInstance :: String -> String -> [DataAnalysis] -> DataAnalysis
-createInstance typeName constrName params = Instance typeName constrName "" params (maybe 0 (+1) (foldr max Nothing $ map (Just . height) params))
+createInstance typeName constrName params = Instance typeName constrName "" params 0
 
 class                               Analyze a             where analyze :: a -> DataAnalysis
 instance                            Analyze Int           where analyze x = Instance "Int"  (show $ x `compare` 0) (show x) [] 0
@@ -219,3 +209,12 @@ instance (Analyze a, Analyze b) =>  Analyze (a, b)        where analyze (l, r) =
 --   let f = (+) :: (Int -> Int -> Int) in
 --     let prop_gen storeRef a b = monadicIO $ run $ storeGenerate storeRef [analyze (3 :: Int), analyze (0 :: Int)] (analyze (4 :: Int)) (f a b) in
 --       newIORef [] >>= (\s -> liftM2 (,) (quickCheckWithResult defaultTestArgs (prop_gen s)) (readIORef s))
+
+approxAnalysis :: CB.Nat -> DataAnalysis -> DataAnalysis
+approxAnalysis n x  | n == 0    = Instance [] [] [] [] 0
+                    | otherwise = x { parameters = map (approxAnalysis (pred n)) $ parameters x }
+
+preprocess :: DataAnalysis -> DataAnalysis
+preprocess x = let
+    params = map preprocess $ parameters x
+  in x { height = maybe 0 (+1) (foldr (max . Just . height) Nothing params), parameters = params }
