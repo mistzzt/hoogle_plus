@@ -102,7 +102,7 @@ tierSortBy f xs = do
 cherryPickByOutput :: Monad m => ExampleSorter m -> TierExampleSorter m -> [DataAnalysis] -> CachedTed m [DataAnalysis]
 cherryPickByOutput g f xs = do
     tiers <- f (last . parameters) xs
-    mapM (fmap (head . map fst). g (\x -> x {parameters = (init . parameters) x})) tiers
+    mapM (fmap (take 3 . map fst). g (\x -> x {parameters = (init . parameters) x})) tiers <&> concat
 
 stochasticSimpleSortBy :: Monad m => ExampleSorter m
 stochasticSimpleSortBy f xs =
