@@ -1,5 +1,4 @@
-{-# LANGUAGE FlexibleInstances, MultiParamTypeClasses, DeriveDataTypeable, LambdaCase, DeriveGeneric, DeriveAnyClass #-}
-{-# LANGUAGE NamedFieldPuns #-}
+{-# LANGUAGE FlexibleInstances, MultiParamTypeClasses, DeriveDataTypeable, DeriveGeneric, DeriveAnyClass, LambdaCase, NamedFieldPuns #-}
 module InternalTypeGen where
 
 import GHC.Generics (Generic)
@@ -15,7 +14,7 @@ import Text.Printf (printf)
 import qualified Test.ChasingBottoms as CB
 import qualified Test.QuickCheck as QC
 
-import qualified Data.Vector         as V
+-- import qualified Data.Vector         as V
 -- import InternalTed
 
 -- import Test.QuickCheck
@@ -40,22 +39,24 @@ data DataAnalysis =
             } deriving (Show, Eq, Generic, NFData)
 
 instance Eq a => Eq (CB.Result a) where
-  (CB.Value a) == (CB.Value b) = a == b
-  CB.NonTermination == CB.NonTermination = True
-  (CB.Exception _) == (CB.Exception _) = True
-  _ == _ = False
+  CB.Value a        == CB.Value b         = a == b
+  CB.NonTermination == CB.NonTermination  = True
+  CB.Exception _    == CB.Exception _     = True
+  _                 == _                  = False
 
 isFailedResult :: CB.Result String -> Bool
-isFailedResult result = case result of
-  CB.NonTermination -> True
-  CB.Exception _ -> True
-  CB.Value a | "_|_" `isInfixOf` a -> True
-  CB.Value a | "Exception" `isInfixOf` a -> True
-  _ -> False
+isFailedResult = \case
+  CB.Value a
+    | "_|_" `isInfixOf` a       -> True
+    | "Exception" `isInfixOf` a -> True
+  CB.NonTermination             -> True
+  CB.Exception _                -> True
+  _                             -> False
 
 anyDuplicate :: Eq a => [a] -> Bool
-anyDuplicate [x, y] = x == y
-anyDuplicate xs = length (nub xs) /= length xs
+anyDuplicate = \case
+  [x, y] -> x == y
+  xs     -> length (nub xs) /= length xs
 
 analyzeTop :: (Show a, Analyze a) => a -> DataAnalysis
 analyzeTop x = (analyze x) {expr = show x}
