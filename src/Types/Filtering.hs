@@ -49,8 +49,9 @@ data DataAnalysis =
             } deriving (Show, Eq, Read)
 
 instance Hashable DataAnalysis where
-  hashWithSalt salt Instance {constructorName, parameters} =
+  hashWithSalt salt Instance {typeName, constructorName, parameters} =
     salt `hashWithSalt`
+    typeName `hashWithSalt` 
     constructorName `hashWithSalt` parameters
 
 instance Show InternalExample where

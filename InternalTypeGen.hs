@@ -16,7 +16,7 @@ import qualified Test.ChasingBottoms as CB
 import qualified Test.QuickCheck as QC
 
 import qualified Data.Vector         as V
-import InternalTed
+-- import InternalTed
 
 -- import Test.QuickCheck
 -- import Test.QuickCheck.Property
@@ -106,7 +106,7 @@ instance Show             MyChar where show (MyCharValue v) = show v; showList =
 instance QC.Arbitrary     MyChar where arbitrary = QC.elements (map MyCharValue defaultCharRange)
 instance QC.CoArbitrary   MyChar where coarbitrary (MyCharValue v) = QC.coarbitrary $ ord v
 
-data     MyFun a b = Generated (a -> b) | Expression String (a -> b)
+data     MyFun a b = Generated (a -> b) | Expression String (a -> b) deriving (Data)
 instance (QC.Arbitrary a, QC.CoArbitrary b)                       => QC.CoArbitrary (MyFun a b)   where coarbitrary = \case Generated f -> QC.coarbitrary f; Expression _ f -> QC.coarbitrary f
 instance Show a                                                   => Show (MyFun a b)             where show = \case Expression str _ -> "(" ++ str ++ ")"; Generated f -> "<Generated>"
 instance {-# OVERLAPPABLE #-} (QC.CoArbitrary a, QC.Arbitrary b)  => QC.Arbitrary (MyFun a b)     where arbitrary = liftM Generated QC.arbitrary
@@ -125,7 +125,7 @@ instance Unwrappable MyChar Char                                                
 instance (Unwrappable a c, Unwrappable b d)   => Unwrappable (a -> b)    (c -> d)   where unwrap f = \x -> unwrap $ f $ wrap x; wrap f = \x -> wrap $ f $ unwrap x
 instance (Unwrappable a c, Unwrappable b d)   => Unwrappable (MyFun a b) (c -> d)   where unwrap (Generated f) = unwrap f; unwrap (Expression _ f) = unwrap f; wrap f = Generated (wrap f)
 
-instance                                         Unwrappable a a                    where unwrap = id; wrap = id
+instance {-# INCOHERENT #-}                      Unwrappable a a                    where unwrap = id; wrap = id
 instance {-# OVERLAPPING #-} Unwrappable a b  => Unwrappable [a] [b]                where unwrap = fmap unwrap; wrap = fmap wrap
 instance {-# OVERLAPPING #-} Unwrappable a b  => Unwrappable (Maybe a) (Maybe b)    where unwrap = fmap unwrap; wrap = fmap wrap
 instance (Unwrappable a c, Unwrappable b d)   => Unwrappable (a, b) (c, d)          where unwrap (x, y) = (unwrap x, unwrap y); wrap (x, y) = (wrap x, wrap y)

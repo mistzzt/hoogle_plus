@@ -127,7 +127,7 @@ replaceMyType x =
 buildFunctionWrapper :: [(String, String)] -> FunctionSignature -> (String, String, String, String) -> String
 buildFunctionWrapper functions solutionType@FunctionSignature{_returnType} params@(plain, typed, analyses, unwrp) =
     unwords
-      (map (buildLetFunction $ show solutionType) functions ++ [buildWrapper (map fst functions) params (show _returnType)])
+      (map (buildLetFunction $ show solutionType) functions ++ [buildWrapper (map fst functions) params (show $ replaceMyType _returnType)])
   where
     buildLetFunction :: String -> (String, String) -> String
     buildLetFunction programType (wrapperName, program) =
@@ -136,7 +136,7 @@ buildFunctionWrapper functions solutionType@FunctionSignature{_returnType} param
     -- ! the wrapper magic (i.e. MyInt) only lives here (inside `typed`)
     buildWrapper :: [String] -> (String, String, String, String) -> String -> String
     buildWrapper wrapperNames (plain, typed, analyses, unwrp) retType =
-      printf "let executeWrapper %s = (Prelude.map (\\f -> f %s :: %s) [%s]) in" typed unwrp retType (intercalate ", " wrapperNames) :: String
+      printf "let executeWrapper %s = (Prelude.map (\\f -> wrap $ f %s :: %s) [%s]) in" typed unwrp retType (intercalate ", " wrapperNames) :: String
 
 buildNotCrashProp :: String -> FunctionSignature -> String
 buildNotCrashProp solution funcSig = formatNotCrashProp params wrapper
