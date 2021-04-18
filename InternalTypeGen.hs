@@ -60,9 +60,9 @@ anyDuplicate xs = length (nub xs) /= length xs
 analyzeTop :: (Show a, Analyze a) => a -> DataAnalysis
 analyzeTop x = (analyze x) {expr = show x}
 
-storeEval :: (Data a, Analyze a) => IORef [[InternalExample]] -> [DataAnalysis] -> [a] -> ([CB.Result String] -> Bool) -> Bool -> IO QC.Property
-storeEval storeRef inputs values prop includeFailed = do
-    outputs <- mapM (liftM splitResult . evaluateValue defaultTimeoutMicro) values
+storeEval :: (Analyze a, Unwrappable a b, Data b) => IORef [[InternalExample]] -> [DataAnalysis] -> [a] -> ([CB.Result String] -> Bool) -> Bool -> b -> IO QC.Property
+storeEval storeRef inputs values prop includeFailed retTypeInstance = do
+    outputs <- mapM (liftM splitResult . evaluateValue defaultTimeoutMicro retTypeInstance) values
 
     let examples = map (\(expr, analysis) -> InternalExample (inputs ++ [(convertCBAnalysis analysis) {expr = showCBResult expr}])) outputs
     let propTest = prop $ map fst outputs
@@ -71,8 +71,8 @@ storeEval storeRef inputs values prop includeFailed = do
 
     return (propTest QC.==> True)
   where
-    evaluateValue :: (Data a, Analyze a) => Int -> a -> IO (CB.Result (String, DataAnalysis))
-    evaluateValue timeInMicro x = CB.timeOutMicro timeInMicro $ liftM2 (,) (t x) (s x)
+    evaluateValue :: (Analyze a, Unwrappable a b, Data b) => Int -> b -> a -> IO (CB.Result (String, DataAnalysis))
+    evaluateValue timeInMicro retType x = CB.timeOutMicro timeInMicro $ liftM2 (,) (t (unwrap x `asTypeOf` retType)) (s x)
       where
         t = evaluate . force . CB.approxShow defaultMaxOutputLength
         s = fmap preprocess . evaluate . force . approxAnalysis defaultMaxOutputLength . analyze -- evaluate only evaluates to weak head normal form

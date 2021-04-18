@@ -139,16 +139,16 @@ buildFunctionWrapper functions solutionType@FunctionSignature{_returnType} param
       printf "let executeWrapper %s = (Prelude.map (\\f -> wrap $ f %s :: %s) [%s]) in" typed unwrp retType (intercalate ", " wrapperNames) :: String
 
 buildNotCrashProp :: String -> FunctionSignature -> String
-buildNotCrashProp solution funcSig = formatNotCrashProp params wrapper
+buildNotCrashProp solution funcSig = formatNotCrashProp params (show $ _returnType funcSig) wrapper
   where
     params@(plain, typed, analyses, unwrp) = showParams (_argsType funcSig)
 
     wrapper = buildFunctionWrapper [("wrappedSolution", solution)] funcSig params
-    formatNotCrashProp = formatProp "prop_not_crash" "not . isFailedResult . Prelude.head"-- "\\out -> (not $ isFailedResult $ Prelude.head out) ==> True"
+    formatNotCrashProp = formatProp "prop_not_crash" "not . isFailedResult . Prelude.head"
 
-    formatProp propName propBody (plain, typed, analyses, unwrp) wrappedSolution = unwords
+    formatProp propName propBody (plain, typed, analyses, unwrp) retType wrappedSolution = unwords
       [ wrappedSolution
-      , printf "let %s storeRef %s = monadicIO $ run $ storeEval storeRef (%s) (executeWrapper %s) (%s) True in" propName plain analyses plain propBody
+      , printf "let %s storeRef %s = monadicIO $ run $ storeEval storeRef (%s) (executeWrapper %s) (%s) True (undefined :: %s) in" propName plain analyses plain propBody retType
       , printf "newIORef [] >>= (\\storeRef -> liftM2 (,) (quickCheckWithResult defaultTestArgs (%s storeRef)) (readIORef storeRef)) " propName ] :: String
 
 buildDupCheckProp :: (String, [String]) -> FunctionSignature -> [String]
@@ -159,13 +159,14 @@ buildDupCheckProp' :: (String, [String]) -> FunctionSignature -> String
 buildDupCheckProp' (sol, otherSols) funcSig = unwords [wrapper, formatProp]
   where
     params@(plain, typed, analyses, unwrp) = showParams (_argsType funcSig)
+    retType = show $ _returnType funcSig
     solutionType = show funcSig
 
     wrapper = buildFunctionWrapper solutions funcSig params
     solutions = zip [printf "result_%d" x :: String | x <- [0..] :: [Int]] (sol:otherSols)
 
     formatProp = unwords
-      [ printf "let prop_duplicate storeRef %s = monadicIO $ run $ storeEval storeRef (%s) (executeWrapper %s) (not . anyDuplicate) False in" plain analyses plain
+      [ printf "let prop_duplicate storeRef %s = monadicIO $ run $ storeEval storeRef (%s) (executeWrapper %s) (not . anyDuplicate) False (undefined :: %s) in" plain analyses plain retType
       , printf "newIORef [] >>= (\\storeRef -> liftM2 (,) (quickCheckWithResult defaultTestArgs (prop_duplicate storeRef)) (readIORef storeRef))" ] :: String -- todo: fixme
 
 -- | Run Hint with the default script loaded.
