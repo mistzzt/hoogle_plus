@@ -54,7 +54,7 @@ sortWithTreeDistVar_ = simpleSortBy id
 
 work :: Monad m => [DataAnalysis] -> CachedTed m ([DataAnalysis], [[DataAnalysis]])
 -- work xs = previewSimilarExamples (stochasticSimpleSortBy id) xs 10
-work xs = previewSignificantExamples (stochasticSimpleSortBy id) xs 10
+work xs = previewPinningExamples (stochasticSimpleSortBy id) xs 10
 -- work xs = (\x -> (x, map (const []) x)) <$> cherryPickByOutput stochasticSimpleSortBy tierSortBy xs -- previewSimilarExamples sortWithTreeDistVar_ xs 10
 
 previewSimilarExamples :: Monad m => ([DataAnalysis] -> CachedTed m [(DataAnalysis, Int)]) -> [DataAnalysis] -> Int -> CachedTed m ([DataAnalysis], [[DataAnalysis]])
@@ -72,13 +72,28 @@ previewSignificantExamples f xs n = do
 
   where
     findSignificant :: Monad m => DataAnalysis -> [DataAnalysis] -> CachedTed m [DataAnalysis]
-    findSignificant x src = filterM (isSignificant x) src
+    findSignificant x src = filterM (isSignificant x) src <&> take n
 
     isSignificant :: Monad m => DataAnalysis -> DataAnalysis -> CachedTed m Bool
     isSignificant x x' = do
       inputDiff <- compareDataAnalyses (\i -> i {parameters = (init . parameters) i}) x x'
       outputDiff <- compareDataAnalyses (last . parameters) x x'
       return (inputDiff < outputDiff && outputDiff > 2)
+
+previewPinningExamples :: Monad m => ([DataAnalysis] -> CachedTed m [(DataAnalysis, Int)]) -> [DataAnalysis] -> Int -> CachedTed m ([DataAnalysis], [[DataAnalysis]])
+previewPinningExamples f xs n = do
+    sorted <- take n . map fst <$> f xs
+    mapM (`findPinning` xs) sorted <&> (sorted,)
+  where
+    findPinning :: Monad m => DataAnalysis -> [DataAnalysis] -> CachedTed m [DataAnalysis]
+    findPinning x src = filterM (isPinning x) src <&> take n
+
+    isPinning :: Monad m => DataAnalysis -> DataAnalysis -> CachedTed m Bool
+    isPinning x x' = do
+      inputDiff <- compareDataAnalyses (\i -> i {parameters = (init . parameters) i}) x x'
+      outputDiff <- compareDataAnalyses (last . parameters) x x'
+      return (outputDiff == 0 && inputDiff > 0) -- output pinning
+      -- return (inputDiff == 0 && outputDiff > 0) -- input pinning
 
 simpleSortBy :: Monad m => ExampleSorter m
 simpleSortBy f xs =
