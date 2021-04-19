@@ -124,11 +124,12 @@ printFilter solution fs@FilterState{discardedSolutions, solutionDescriptions, di
         putStrLn $ unlines $ zipWith (\ex sms -> printf "[Example] %s\r\n%s" (show ex) (unlines $ map show sms)) ioExamples similarExamples
         putStrLn "***Diff Examples***"
         putStrLn diffExamples
-        putStrLn $ LB.unpack $ encodeWithPrefix $ map show ioExamples
+        putStrLn $ LB.unpack $ encodeWithPrefix exprMap
         putStrLn "**********************************************\n"
     where
         diffExamples = unlines $ concatMap (\(soln, examples) -> ("- " ++ soln) : map (('\t':) . show) examples) (Map.toList differentiateExamples)
         (ioExamples, similarExamples)   = let (_, desc) = head $ filter ((== solution) . fst) solutionDescriptions in case desc of Total ex s -> (ex, s); Partial ex s -> (ex, s); _ -> ([], [])
+        exprMap = Map.fromList $ zip (map show ioExamples) (map (map show) similarExamples)
 
         encodeWithPrefix obj = LB.append (LB.pack "EXPRMTS:") (A.encode obj)
 
