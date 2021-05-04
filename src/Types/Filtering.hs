@@ -83,6 +83,7 @@ data ArgumentType =
     Concrete      String
   | Polymorphic   String
   | Instantiated  String
+  | InstantFixed  String
   | ArgTypeList   ArgumentType
   | ArgTypeTuple  [ArgumentType]
   | ArgTypeApp    ArgumentType ArgumentType
@@ -90,14 +91,15 @@ data ArgumentType =
   deriving (Eq)
 
 instance Show ArgumentType where
-  show (Concrete    name) = name
-  show (Polymorphic name) = name
-  show (Instantiated name) = name
-  show (ArgTypeList sub)  = printf "[%s]" (show sub)
-  show (ArgTypeApp  l r)  = printf "((%s) (%s))"  (show l) (show r)
-  show (ArgTypeTuple types) =
-    (printf "(%s)" . intercalate ", " . map show) types
-  show (ArgTypeFunc src dst) = printf "((%s) -> (%s))" (show src) (show dst)
+  show = \case
+    Concrete      name  -> name
+    Polymorphic   name  -> name
+    Instantiated  name  -> name
+    InstantFixed  name  -> name
+    ArgTypeList   sub   -> printf "[%s]" (show sub)
+    ArgTypeApp    l r   -> printf "((%s) (%s))"  (show l) (show r)
+    ArgTypeTuple  types -> (printf "(%s)" . intercalate ", " . map show) types
+    ArgTypeFunc src dst -> printf "((%s) -> (%s))" (show src) (show dst)
 
 newtype NotSupportedException = NotSupportedException String deriving (Show, Typeable)
 instance Exception NotSupportedException

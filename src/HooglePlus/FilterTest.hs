@@ -80,9 +80,10 @@ parseTypeString input = FunctionSignature constraints argsType returnType
 -- >>> instantiateSignature (parseTypeString "[a] -> [b] -> (a -> b -> c) -> (c, Maybe c)")
 -- () => Int -> String -> ((Int) -> (((String) -> (Bool)))) -> (Bool, ((Maybe) (Bool)))
 instantiateSignature :: FunctionSignature -> FunctionSignature
-instantiateSignature (FunctionSignature _ argsType returnType) =
-    let mappings = buildMappings (returnType:argsType) in
-    let instantiate = instantPolymorphic mappings in
+instantiateSignature (FunctionSignature tcs argsType returnType) =
+    let mappings = buildMappings (returnType:argsType)
+        typeclasses = captureTypeclasses tcs
+        instantiate = instantPolymorphic mappings typeclasses in
       FunctionSignature [] (map instantiate argsType) (instantiate returnType)
   where
     buildMappings xs = zip (sort $ nubOrd $ concatMap capturePolymorphic xs) types
@@ -96,17 +97,19 @@ instantiateSignature (FunctionSignature _ argsType returnType) =
       ArgTypeFunc   l r -> concatMap capturePolymorphic [l, r]
       _                 -> []
 
-    instantPolymorphic mappings = f
+    captureTypeclasses = nubOrd . concatMap capturePolymorphic
+
+    instantPolymorphic mappings typeclasses = f
       where f = \case
-                  Polymorphic   x   -> Instantiated $ maybe "Int" snd (find ((== x) . fst) mappings)
+                  Polymorphic   x   -> (if x `elem` typeclasses then InstantFixed else Instantiated) $ maybe "Int" snd (find ((== x) . fst) mappings)
                   ArgTypeList   x   -> ArgTypeList $ f x
                   ArgTypeTuple  xs  -> ArgTypeTuple $ map f xs
                   ArgTypeApp    l r -> ArgTypeApp (f l) (f r)
-                  ArgTypeFunc   l r -> ArgTypeFunc (f l) (f r)
+                  ArgTypeFunc   l r -> ArgTypeFunc (f l) (f r) 
                   other             -> other
 
 replaceMyType :: ArgumentType -> ArgumentType
-replaceMyType x =
+replaceMyType =
   let
     apply a b = ArgTypeApp (ArgTypeApp (Concrete "MyFun") a) b
     applyConcrete t = case t of
@@ -114,14 +117,14 @@ replaceMyType x =
                       "Char"    -> "MyChar"
                       "String"  -> "[MyChar]"
                       _         -> t
-  in case x of
+  in \case
     Concrete      n         -> Concrete $ applyConcrete n
-    Polymorphic   _         -> x
     Instantiated  n         -> ArgTypeApp (Concrete "Box") (Concrete $ applyConcrete n)
     ArgTypeList   t         -> ArgTypeList (replaceMyType t)
     ArgTypeTuple  ts        -> ArgTypeTuple (map replaceMyType ts)
     ArgTypeApp    f a       -> ArgTypeApp (replaceMyType f) (replaceMyType a)
     ArgTypeFunc   arg res   -> apply (replaceMyType arg) (replaceMyType res)
+    other                   -> other
 
 
 buildFunctionWrapper :: [(String, String)] -> FunctionSignature -> (String, String, String, String) -> String
