@@ -10,7 +10,7 @@ from os.path import join
 from multiprocessing import Pool
 
 RESULT_DIR = "output"
-NUM_WORKER = 4
+NUM_WORKER = 8
 
 def load_query_set(file_name):
     with open(file_name, 'r') as f: return yaml.load(f, Loader=yaml.FullLoader)

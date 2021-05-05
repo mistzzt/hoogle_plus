@@ -56,7 +56,8 @@ work :: Monad m => [DataAnalysis] -> CachedTed m ([DataAnalysis], [[DataAnalysis
 -- work xs = previewSimilarExamples (stochasticSimpleSortBy id) xs 10
 -- work xs = previewPinningExamples (stochasticSimpleSortBy id) xs 10
 -- work xs = (\x -> (x, map (const []) x)) . map fst <$> stochasticSimpleSortBy id xs
-work xs = previewSignificantExamples (stochasticSimpleSortBy id) xs 10
+-- work xs = previewSignificantExamples (stochasticSimpleSortBy id) xs 10
+work xs = pure (xs, [])
 
 previewSimilarExamples :: Monad m => ([DataAnalysis] -> CachedTed m [(DataAnalysis, Int)]) -> [DataAnalysis] -> Int -> CachedTed m ([DataAnalysis], [[DataAnalysis]])
 previewSimilarExamples f xs n = do

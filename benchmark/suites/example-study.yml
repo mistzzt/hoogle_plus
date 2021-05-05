@@ -95,4 +95,4 @@
   source: "hoogle"
   example:
     - inputs: ["[Left 1, Right 2, Right 3]"]
-      output: "Right [2, 3]
+      output: "Right [2, 3]"
