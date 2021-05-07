@@ -37,8 +37,6 @@ import Types.Program
 import Types.Type hiding (typeOf)
 import PetriNet.Utils (unHTML)
 import Synquid.Utils (getTmpDir)
-import HooglePlus.ExampleSorter
-
 
 import Debug.Trace
 
@@ -109,26 +107,11 @@ instantiateSignature (FunctionSignature tcs argsType returnType) =
                   other             -> other
 
 replaceMyType :: ArgumentType -> ArgumentType
-replaceMyType =
-  let
-    apply a b = ArgTypeApp (ArgTypeApp (Concrete "MyFun") a) b
-    applyConcrete t = case t of
-                      "Int"     -> "MyInt"
-                      "Char"    -> "MyChar"
-                      "String"  -> "[MyChar]"
-                      _         -> t
-  in \case
-    Concrete      n         -> Concrete $ applyConcrete n
-    Instantiated  n         -> ArgTypeApp (Concrete "Box") (Concrete $ applyConcrete n)
-    ArgTypeList   t         -> ArgTypeList (replaceMyType t)
-    ArgTypeTuple  ts        -> ArgTypeTuple (map replaceMyType ts)
-    ArgTypeApp    f a       -> ArgTypeApp (replaceMyType f) (replaceMyType a)
-    ArgTypeFunc   arg res   -> apply (replaceMyType arg) (replaceMyType res)
-    other                   -> other
+replaceMyType = id
 
 
-buildFunctionWrapper :: [(String, String)] -> FunctionSignature -> (String, String, String, String) -> String
-buildFunctionWrapper functions solutionType@FunctionSignature{_returnType} params@(plain, typed, analyses, unwrp) =
+buildFunctionWrapper :: [(String, String)] -> FunctionSignature -> (String, String, String) -> String
+buildFunctionWrapper functions solutionType@FunctionSignature{_returnType} params@(plain, typed, shows) =
     unwords
       (map (buildLetFunction $ show solutionType) functions ++ [buildWrapper (map fst functions) params (show $ replaceMyType _returnType)])
   where
@@ -137,21 +120,21 @@ buildFunctionWrapper functions solutionType@FunctionSignature{_returnType} param
       printf "let %s = ((%s) :: %s) in" wrapperName program programType :: String
 
     -- ! the wrapper magic (i.e. MyInt) only lives here (inside `typed`)
-    buildWrapper :: [String] -> (String, String, String, String) -> String -> String
-    buildWrapper wrapperNames (plain, typed, analyses, unwrp) retType =
-      printf "let executeWrapper %s = (Prelude.map (\\f -> wrap $ f %s :: %s) [%s]) in" typed unwrp retType (intercalate ", " wrapperNames) :: String
+    buildWrapper :: [String] -> (String, String, String) -> String -> String
+    buildWrapper wrapperNames (plain, typed, shows) retType =
+      printf "let executeWrapper %s = (Prelude.map (\\f -> f %s) [%s]) in" typed plain (intercalate ", " wrapperNames) :: String
 
 buildNotCrashProp :: String -> FunctionSignature -> String
 buildNotCrashProp solution funcSig = formatNotCrashProp params (show $ _returnType funcSig) wrapper
   where
-    params@(plain, typed, analyses, unwrp) = showParams (_argsType funcSig)
+    params@(plain, typed, shows) = showParams (_argsType funcSig)
 
     wrapper = buildFunctionWrapper [("wrappedSolution", solution)] funcSig params
     formatNotCrashProp = formatProp "prop_not_crash" "not . isFailedResult . Prelude.head"
 
-    formatProp propName propBody (plain, typed, analyses, unwrp) retType wrappedSolution = unwords
+    formatProp propName propBody (plain, typed, shows) retType wrappedSolution = unwords
       [ wrappedSolution
-      , printf "let %s storeRef %s = monadicIO $ run $ storeEval storeRef (%s) (executeWrapper %s) (%s) True (undefined :: %s) in" propName plain analyses plain propBody retType
+      , printf "let %s storeRef %s = monadicIO $ run $ storeEval storeRef (%s) (executeWrapper %s) (%s) True in" propName plain shows plain propBody
       , printf "newIORef [] >>= (\\storeRef -> liftM2 (,) (quickCheckWithResult defaultTestArgs (%s storeRef)) (readIORef storeRef)) " propName ] :: String
 
 buildDupCheckProp :: (String, [String]) -> FunctionSignature -> [String]
@@ -161,7 +144,7 @@ buildDupCheckProp (sol, otherSols) funcSig =
 buildDupCheckProp' :: (String, [String]) -> FunctionSignature -> String
 buildDupCheckProp' (sol, otherSols) funcSig = unwords [wrapper, formatProp]
   where
-    params@(plain, typed, analyses, unwrp) = showParams (_argsType funcSig)
+    params@(plain, typed, shows) = showParams (_argsType funcSig)
     retType = show $ _returnType funcSig
     solutionType = show funcSig
 
@@ -169,7 +152,7 @@ buildDupCheckProp' (sol, otherSols) funcSig = unwords [wrapper, formatProp]
     solutions = zip [printf "result_%d" x :: String | x <- [0..] :: [Int]] (sol:otherSols)
 
     formatProp = unwords
-      [ printf "let prop_duplicate storeRef %s = monadicIO $ run $ storeEval storeRef (%s) (executeWrapper %s) (not . anyDuplicate) False (undefined :: %s) in" plain analyses plain retType
+      [ printf "let prop_duplicate storeRef %s = monadicIO $ run $ storeEval storeRef (%s) (executeWrapper %s) (not . anyDuplicate) False in" plain shows plain
       , printf "newIORef [] >>= (\\storeRef -> liftM2 (,) (quickCheckWithResult defaultTestArgs (prop_duplicate storeRef)) (readIORef storeRef))" ] :: String -- todo: fixme
 
 -- | Run Hint with the default script loaded.
@@ -180,9 +163,9 @@ runInterpreterWithEnvTimeout timeInMicro = runInterpreterWithEnvTimeoutPrepareMo
 -- | Run Hint with the default script loaded, but also prepare arguments for HOFs.
 runInterpreterWithEnvTimeoutHOF :: MonadIO m => Int -> FunctionSignature -> InterpreterT IO a -> FilterTest m (Either InterpreterError a)
 runInterpreterWithEnvTimeoutHOF timeInMicro funcSig executeInterpreter = do
-    fileName <- prepareEnvironment funcSig
+    -- fileName <- prepareEnvironment funcSig
 
-    let ioList = [getDataFileName "InternalTypeGen.hs", pure fileName]
+    let ioList = [getDataFileName "InternalTypeGen.hs"]
     result <- liftIO $ runInterpreterWithEnvTimeoutPrepareModule timeInMicro (sequence ioList) executeInterpreter
     case result of
       Left (WontCompile e)  -> liftIO $ print e >> runInterpreterWithEnvTimeout timeInMicro executeInterpreter
@@ -216,6 +199,7 @@ evaluateProperties modules funcSig properties =
 validateCandidate :: MonadIO m => [String] -> Candidate -> FunctionSignature -> FilterTest m CandidateValidDesc
 validateCandidate modules solution funcSig = do
     result <- evaluateProperties modules funcSig [prop]
+
     case result of
       Left  (NotAllowed _)            -> return $ Unknown "timeout"
       Left  error                     -> return $ Unknown $ show error
@@ -227,8 +211,8 @@ validateCandidate modules solution funcSig = do
     readResult r = case fst r of
       QC.GaveUp{QC.numTests}
             | numTests == 0 -> Invalid
-            | otherwise     -> (uncurry Partial . selectExamples . concat . snd) r
-      QC.Success{}          -> (uncurry Total . selectExamples . concat . snd) r
+            | otherwise     -> (Partial . take 10 . concat . snd) r
+      QC.Success{}          -> (Total . take 10 . concat . snd) r
       _                     -> trace (show r) Invalid
 
 -- >>> (evalStateT (classifyCandidate ["Data.Either", "GHC.List", "Data.Maybe", "Data.Function"] "\\e f -> Data.Either.either f (GHC.List.head []) e" (instantiateSignature $ parseTypeString "Either a b -> (a -> b) -> b") ["\\e f -> Data.Either.fromRight (f (Data.Maybe.fromJust Data.Maybe.Nothing)) e", "\\e f -> Data.Either.either f Data.Function.id e"]) emptyFilterState) :: IO CandidateDuplicateDesc
@@ -308,8 +292,8 @@ checkDuplicates modules funcSig candidate = do
 -- (plain variables, typed variables, list of show, unwrapped variables)
 -- >>> showParams [Concrete "Int", Concrete "String"]
 -- ("(arg_1) (arg_2)","(arg_1 :: MyInt) (arg_2 :: [MyChar])","[(show arg_1), (show arg_2)]","(unwrap arg_1) (unwrap arg_2)")
-showParams :: [ArgumentType] -> (String, String, String, String)
-showParams args = (plain, typed, analyses, unwrp)
+showParams :: [ArgumentType] -> (String, String, String)
+showParams args = (plain, typed, shows)
   where
     args' = zip [1..] $ map replaceMyType args
 
@@ -317,17 +301,8 @@ showParams args = (plain, typed, analyses, unwrp)
     unwrp = unwords $ formatIdx "(unwrap arg_%d)"
     typed = unwords $ map (\(idx, tipe) -> printf "(arg_%d :: %s)" idx (show tipe) :: String) args'
 
-    analyses =  "[" ++ intercalate ", " (formatIdx "(analyzeTop arg_%d)") ++ "]"
+    shows =  "[" ++ intercalate ", " (formatIdx "(show arg_%d)") ++ "]"
     formatIdx format = map ((printf format :: Int -> String) . fst) args'
-
-selectExamples :: [InternalExample] -> ([InternalExample], [[InternalExample]])
-selectExamples = bimap (take 10 . map unpackNodes) (take 10 . map (map unpackNodes)) . sortWithTreeDistVar . map packNodes -- take 10 . map (unpackNodes . fst) . sortWithTreeDistVar . map packNodes
-  where
-    packNodes :: InternalExample -> DataAnalysis
-    packNodes (InternalExample dts) = Instance "Root" "!" "" dts (1 + maximum (map height dts))
-
-    unpackNodes :: DataAnalysis -> InternalExample
-    unpackNodes (Instance _ _ _ dts _) = InternalExample dts
 
 -- | Extract higher-order arguments from a type signature.
 -- >>> extractHigherOrderQuery $ parseTypeString "a -> (a -> b) -> [(a -> b -> c)] -> b"
@@ -383,11 +358,11 @@ queryHigherOrderArgument queries = do
   where
     searchFunctions = [queryHoogle, queryHooglePlus]
 
-
+prepareEnvironment _ = return ""
 -- >>> prepareEnvironment $ parseTypeString "a -> (Int -> Int -> Int) -> a"
 -- >>> runInterpreterWithEnvTimeoutHOF (10^8) (parseTypeString "a -> (Int -> [Int]) -> a") (return "114514")
-prepareEnvironment :: MonadIO m => FunctionSignature -> FilterTest m String
-prepareEnvironment funcSig = do
+prepareEnvironment_ :: MonadIO m => FunctionSignature -> FilterTest m String
+prepareEnvironment_ funcSig = do
     let higherOrderTypes = extractHigherOrderQuery funcSig
     let higherOrderTypeStrs = map show higherOrderTypes
 

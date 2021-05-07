@@ -72,7 +72,6 @@ dependencies:
 library:
   source-dirs:
   - src
-  - draft
   other-extensions:
   - TemplateHaskell
   - Rank2Types

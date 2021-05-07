@@ -23,6 +23,7 @@ frameworkModules =
   zip [ "Test.QuickCheck"
   , "Test.QuickCheck.Monadic"
   , "Control.Monad"
+  , "Text.Show.Functions"
   ] (repeat Nothing)
 
   ++ [("Test.ChasingBottoms", Just "CB")]
@@ -38,31 +39,17 @@ type GeneratorResult = [Example]
 type AssociativeInternalExamples = [(Candidate, [InternalExample])]
 type AssociativeExamples = [(Candidate, [Example])]
 
-newtype InternalExample = InternalExample [DataAnalysis] deriving (Read, Eq)
-
-data DataAnalysis =
-  Instance  { typeName          :: String
-            , constructorName   :: String
-            , expr              :: String
-            , parameters        :: [DataAnalysis]
-            , height            :: Int
-            } deriving (Show, Eq, Read)
-
-instance Hashable DataAnalysis where
-  hashWithSalt salt Instance {typeName, constructorName, parameters} =
-    salt `hashWithSalt`
-    typeName `hashWithSalt` 
-    constructorName `hashWithSalt` parameters
+newtype InternalExample = InternalExample [String] deriving (Eq)
 
 instance Show InternalExample where
-    show (InternalExample params) = unwords [unwords (map expr $ init params), "-->", expr $ last params]
+    show (InternalExample params) = unwords [unwords (init params), "-->", last params]
 
 toExample :: InternalExample -> Example
-toExample (InternalExample params) = Example (map expr $ init params) (expr $ last params)
+toExample (InternalExample params) = Example (init params) (last params)
 
 data CandidateValidDesc =
-    Total   [InternalExample] [[InternalExample]]
-  | Partial [InternalExample] [[InternalExample]]
+    Total   [InternalExample]
+  | Partial [InternalExample]
   | Invalid
   | Unknown String
   deriving (Eq)
@@ -74,10 +61,10 @@ data CandidateDuplicateDesc =
 
 instance Show CandidateValidDesc where
   show = \case
-      Total   examples _ -> unlines $ map show examples
-      Partial examples _ -> unlines $ map show examples
-      Invalid            -> "<bottom>"
-      Unknown ex         -> "<exception> " ++ ex
+      Total   examples -> unlines $ map show examples
+      Partial examples -> unlines $ map show examples
+      Invalid          -> "<bottom>"
+      Unknown ex       -> "<exception> " ++ ex
 
 data ArgumentType =
     Concrete      String
