@@ -280,7 +280,7 @@ runChecks env goalType prog = do
       then get <&> (Just . map (second (map toExample)) . Map.toList . differentiateExamples)
       else return Nothing
   where
-    checks = [ checkSolutionNotCrash, checkDuplicates]
+    checks = [checkSolutionNotCrash, checkDuplicates]
 
 checkSolutionNotCrash :: MonadIO m => [String] -> FunctionSignature -> String -> FilterTest m Bool
 checkSolutionNotCrash modules funcSig solution = do
@@ -321,7 +321,7 @@ showParams args = (plain, typed, analyses, unwrp)
     formatIdx format = map ((printf format :: Int -> String) . fst) args'
 
 selectExamples :: [InternalExample] -> ([InternalExample], [[InternalExample]])
-selectExamples = bimap (map unpackNodes) (map (map unpackNodes)) . sortWithTreeDistVar . map packNodes -- take 10 . map (unpackNodes . fst) . sortWithTreeDistVar . map packNodes
+selectExamples = bimap (take 10 . map unpackNodes) (take 10 . map (map unpackNodes)) . sortWithTreeDistVar . map packNodes -- take 10 . map (unpackNodes . fst) . sortWithTreeDistVar . map packNodes
   where
     packNodes :: InternalExample -> DataAnalysis
     packNodes (InternalExample dts) = Instance "Root" "!" "" dts (1 + maximum (map height dts))

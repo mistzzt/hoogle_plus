@@ -22,6 +22,7 @@ import Control.Monad.Trans
 import Control.Monad.State
 import CorePrep
 import CoreSyn
+import Data.Bifunctor (second)
 import Data.Data
 import Data.Ord
 import Data.Either
@@ -121,15 +122,18 @@ printFilter solution fs@FilterState{discardedSolutions, solutionDescriptions, di
         putStrLn "\n*******************FILTER*********************"
         putStrLn $ "SOLN: " ++ solution
         putStrLn "***IO Examples***"
-        putStrLn $ unlines $ zipWith (\ex sms -> printf "[Example] %s\r\n%s" (show ex) (unlines $ map show sms)) ioExamples similarExamples
+        putStrLn $ unlines $ zipWith (\ex sms -> printf "[Example] %s\r\n%s" ex (unlines sms)) ioExamples relatedExamples
         putStrLn "***Diff Examples***"
         putStrLn diffExamples
-        putStrLn $ LB.unpack $ encodeWithPrefix exprMap
+        putStrLn $ LB.unpack $ encodeWithPrefix treatment_2
         putStrLn "**********************************************\n"
     where
         diffExamples = unlines $ concatMap (\(soln, examples) -> ("- " ++ soln) : map (('\t':) . show) examples) (Map.toList differentiateExamples)
-        (ioExamples, similarExamples)   = let (_, desc) = head $ filter ((== solution) . fst) solutionDescriptions in case desc of Total ex s -> (ex, s); Partial ex s -> (ex, s); _ -> ([], [])
-        exprMap = Map.fromList $ zip (map show ioExamples) (map (map show) similarExamples)
+        (ioExamples, relatedExamples)   = let (_, desc) = head $ filter ((== solution) . fst) solutionDescriptions in case desc of Total ex s -> (map show ex, map (map show) s); Partial ex s -> (map show ex, map (map show) s); _ -> ([], [])
+        exprMap = Map.fromList $ zip (map show ioExamples) (map (map show) relatedExamples)
+        
+        treatment_1 = (ioExamples, map (second (map show)) $ Map.toList differentiateExamples)
+        treatment_2 = (ioExamples, zip ioExamples relatedExamples)
 
         encodeWithPrefix obj = LB.append (LB.pack "EXPRMTS:") (A.encode obj)
 
