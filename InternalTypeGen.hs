@@ -21,7 +21,8 @@ import qualified Test.QuickCheck as QC
 -- import Test.QuickCheck.Property
 -- import Test.QuickCheck.Monadic
 
-defaultMaxOutputLength    = 50         :: CB.Nat
+defaultMaxOutputLength    = 50          :: CB.Nat
+defaultMaxAnalysisDepth   = 10          :: CB.Nat  
 defaultTimeoutMicro       = 400         :: Int
 defaultIntRange           = [-2..10]    :: [Int]
 defaultCharRange          = ['a'..'d']  :: [Char]
@@ -76,7 +77,7 @@ storeEval storeRef inputs values prop includeFailed retTypeInstance = do
     evaluateValue timeInMicro retType x = CB.timeOutMicro timeInMicro $ liftM2 (,) (t (unwrap x `asTypeOf` retType)) (s x)
       where
         t = evaluate . force . CB.approxShow defaultMaxOutputLength
-        s = fmap preprocess . evaluate . force . approxAnalysis defaultMaxOutputLength . analyze -- evaluate only evaluates to weak head normal form
+        s = fmap preprocess . evaluate . force . approxAnalysis defaultMaxAnalysisDepth . analyze -- evaluate only evaluates to weak head normal form
 
     splitResult :: CB.Result (a, b) -> (CB.Result a, CB.Result b)
     splitResult = \case
