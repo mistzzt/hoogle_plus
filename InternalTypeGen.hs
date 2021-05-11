@@ -68,7 +68,7 @@ storeEval storeRef inputs values prop includeFailed retTypeInstance = do
 
     let examples = map (\(expr, analysis) -> InternalExample (inputs ++ [(convertCBAnalysis analysis) {expr = showCBResult expr}])) outputs
     let propTest = prop $ map fst outputs
-    when (includeFailed || propTest)
+    when ((includeFailed || propTest) && not (any containsGeneratedFunctions inputs))
       (modifyIORef' storeRef (\xss -> examples : xss))
 
     return (propTest QC.==> True)
@@ -220,3 +220,7 @@ preprocess :: DataAnalysis -> DataAnalysis
 preprocess x = let
     params = map preprocess $ parameters x
   in x { height = maybe 0 (+1) (foldr (max . Just . height) Nothing params), parameters = params }
+
+containsGeneratedFunctions :: DataAnalysis -> Bool
+containsGeneratedFunctions Instance {typeName, constructorName, parameters} =
+  (typeName == "Fun" && constructorName == "_") || any containsGeneratedFunctions parameters
