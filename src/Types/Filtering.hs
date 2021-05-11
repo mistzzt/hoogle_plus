@@ -54,6 +54,9 @@ instance Hashable DataAnalysis where
     typeName `hashWithSalt` 
     constructorName `hashWithSalt` parameters
 
+instance Hashable InternalExample where
+  hashWithSalt salt (InternalExample xs) = salt `hashWithSalt` xs
+
 instance Show InternalExample where
     show (InternalExample params) = unwords [unwords (map expr $ init params), "-->", expr $ last params]
 

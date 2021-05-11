@@ -1,4 +1,4 @@
-{-# LANGUAGE FlexibleContexts, NamedFieldPuns #-}
+{-# LANGUAGE FlexibleContexts, NamedFieldPuns, LambdaCase, TupleSections #-}
 
 module HooglePlus.Utils where
 
@@ -16,17 +16,19 @@ import Synquid.Utils
 import Synquid.Pretty as Pretty
 import Synquid.Program
 import Database.Utils
+import HooglePlus.ExampleSorter
+import Data.Hashable ( Hashable(hash) )
 
 import Control.Exception
 import Control.Monad.Trans
 import Control.Monad.State
 import CorePrep
 import CoreSyn
-import Data.Bifunctor (second)
+import Data.Bifunctor (first, second)
 import Data.Data
 import Data.Ord
 import Data.Either
-import Data.List (sortOn, groupBy, isInfixOf, isPrefixOf, isSuffixOf, intercalate)
+import Data.List (sortOn, groupBy, isInfixOf, isPrefixOf, isSuffixOf, intercalate, sort)
 import Data.List.Extra (nubOrdOn, dropEnd)
 import Data.List.Split (splitOn)
 import Data.Maybe
@@ -42,7 +44,7 @@ import HscTypes
 import IdInfo
 import Outputable hiding (text, (<+>))
 import qualified CoreSyn as Syn
-import qualified Data.Map.Strict as Map hiding (map, foldr)
+import qualified Data.Map.Strict as Map hiding (foldr)
 import qualified Data.Set as Set hiding (map)
 import qualified Data.Text as Text
 import SimplCore (core2core)
@@ -125,18 +127,45 @@ printFilter solution fs@FilterState{discardedSolutions, solutionDescriptions, di
         putStrLn $ unlines $ zipWith (\ex sms -> printf "[Example] %s\r\n%s" ex (unlines sms)) ioExamples relatedExamples
         putStrLn "***Diff Examples***"
         putStrLn diffExamples
-        putStrLn $ LB.unpack $ encodeWithPrefix control
+        putStrLn $ LB.unpack $ encodeWithPrefix (map (second (map (first show))) $ buildExperimentData fs)
         putStrLn "**********************************************\n"
     where
         diffExamples = unlines $ concatMap (\(soln, examples) -> ("- " ++ soln) : map (('\t':) . show) examples) (Map.toList differentiateExamples)
         (ioExamples, relatedExamples)   = let (_, desc) = head $ filter ((== solution) . fst) solutionDescriptions in case desc of Total ex s -> (map show ex, map (map show) s); Partial ex s -> (map show ex, map (map show) s); _ -> ([], [])
-        exprMap = Map.fromList $ zip (map show ioExamples) (map (map show) relatedExamples)
-        
-        treatment_1 = (ioExamples, map (second (map show)) $ Map.toList differentiateExamples)
-        treatment_2 = (ioExamples, zip ioExamples relatedExamples)
-        control = ioExamples
 
         encodeWithPrefix obj = LB.append (LB.pack "EXPRMTS:") (A.encode obj)
+
+        buildExperimentData :: FilterState -> [(String, [(InternalExample, Int)])]
+        buildExperimentData FilterState{solutionDescriptions, differentiateExamples} =
+                Map.toList $
+                Map.map (nubOrdOn (hash . fst)) $
+                    Map.unionWith (++)
+                        (Map.fromList (map (second extractDescription) solutionDescriptions))
+                        (Map.map (map (,1 :: Int)) differentiateExamples)
+            where
+                -- 0 plain; 1 distinguishing; 2 related (significant)
+                extractDescription :: CandidateValidDesc -> [(InternalExample, Int)]
+                extractDescription = \case
+                    Total ex s -> map (,0) ex ++ concatMap (map (,2)) s
+                    Partial ex s -> map (,0) ex ++ concatMap (map (,2)) s
+                    _ -> []
+
+        sortExperimentData :: [(String, [(InternalExample, Int)])] -> [(String, [(InternalExample, Int)])]
+        sortExperimentData = map (second magicSort)
+            where
+                magicSort :: [(InternalExample, Int)] -> [(InternalExample, Int)]
+                magicSort xs =
+                    let
+                        keyMap = Map.fromList $ map (first hash) xs
+                        queryKey ex = fromMaybe 0 $ keyMap Map.!? hash ex
+                    in
+                        map ((\x -> (x, queryKey x)) . unpackNodes) (sortWithTreeDistVarPlain $ map (packNodes . fst) xs)
+
+        packNodes :: InternalExample -> DataAnalysis
+        packNodes (InternalExample dts) = Instance "Root" "!" "" dts (1 + maximum (map height dts))
+
+        unpackNodes :: DataAnalysis -> InternalExample
+        unpackNodes (Instance _ _ _ dts _) = InternalExample dts
 
 extractSolution :: Environment -> TypeSkeleton -> UProgram -> ([String], String, String, [(Id, SchemaSkeleton)])
 extractSolution env goalType prog = (modules, funcSig, body, argList)

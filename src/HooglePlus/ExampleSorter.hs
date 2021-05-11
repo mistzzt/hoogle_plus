@@ -1,5 +1,5 @@
 {-# LANGUAGE FlexibleContexts, TupleSections #-}
-module HooglePlus.ExampleSorter (sortWithTreeDistVar) where
+module HooglePlus.ExampleSorter (sortWithTreeDistVar, sortWithTreeDistVarPlain) where
 
 import Control.Lens ( view, Field1(_1), Field2(_2), Field3(_3) )
 import Control.Monad.State ( foldM, modify, evalState, MonadState(get), StateT )
@@ -8,7 +8,7 @@ import Data.Bifunctor ( Bifunctor(second) )
 import Data.Functor
 import Data.Hashable ( Hashable(hash) )
 import Data.List (sortOn, sortBy, (\\), maximumBy, minimumBy, foldl', iterate', sort, unfoldr)
-import Data.List.Extra (groupOn)
+import Data.List.Extra (groupOn, nubOrdOn)
 import Data.Ord ( comparing )
 import qualified Data.Map as Map
 import System.IO.Unsafe (unsafePerformIO)
@@ -43,7 +43,10 @@ subsetSize :: Int
 subsetSize = 10
 
 sortWithTreeDistVar :: [DataAnalysis] -> ([DataAnalysis], [[DataAnalysis]])
-sortWithTreeDistVar xs = evalState (work xs) Map.empty
+sortWithTreeDistVar xs = evalState (work (nubOrdOn hash xs)) Map.empty
+
+sortWithTreeDistVarPlain :: [DataAnalysis] -> [DataAnalysis]
+sortWithTreeDistVarPlain xs = map fst $ evalState (stochasticSimpleSortBy id xs) Map.empty
 
 sortWithTreeDistVar_ :: Monad m => [DataAnalysis] -> CachedTed m [(DataAnalysis, Int)]
 sortWithTreeDistVar_ = simpleSortBy id
@@ -56,8 +59,8 @@ work :: Monad m => [DataAnalysis] -> CachedTed m ([DataAnalysis], [[DataAnalysis
 -- work xs = previewSimilarExamples (stochasticSimpleSortBy id) xs 10
 -- work xs = previewPinningExamples (stochasticSimpleSortBy id) xs 10
 -- work xs = (\x -> (x, map (const []) x)) . map fst <$> stochasticSimpleSortBy id xs
--- work xs = previewSignificantExamples (stochasticSimpleSortBy id) xs 10
-work xs = pure (xs, [])
+work xs = previewSignificantExamples (stochasticSimpleSortBy id) xs 10
+-- work xs = pure (xs, [])
 
 previewSimilarExamples :: Monad m => ([DataAnalysis] -> CachedTed m [(DataAnalysis, Int)]) -> [DataAnalysis] -> Int -> CachedTed m ([DataAnalysis], [[DataAnalysis]])
 previewSimilarExamples f xs n = do
