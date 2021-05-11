@@ -133,10 +133,11 @@ emptyFilterState = FilterState {
   differentiateExamples = Map.empty,
   discardedSolutions = [],
   higherOrderArgumentCache = Map.fromList [
-    ("((Int) -> (Int))", ["const 5", "\\x -> x * x", "id"]),
+    ("((Int) -> (Int))", ["const 5", "\\x -> x * x", "id", "\\x -> x + 1"]),
     ("[Int] -> Int", ["head", "last", "length", "\\xs -> xs !! 1"]),
     ("((Int) -> (Bool))", ["\\x -> x < 0", "\\x -> x > 0"]),
-    ("((Int) -> (String))", ["show"])
+    ("((Int) -> (String))", ["show", "\\x -> \"num=\" ++ show x ++ \";\""]),
+    ("((Int) -> (((((Either) (String))) (Bool))))", ["\\x -> if x == 0 then Left \"Zero\" else Right (x < 0)"])
   ]
 }
 
