@@ -76,14 +76,15 @@ previewSignificantExamples f xs n = do
     mapM (`findSignificant` xs) sorted <&> (sorted,)
 
   where
-    findSignificant :: Monad m => DataAnalysis -> [DataAnalysis] -> CachedTed m [DataAnalysis]
-    findSignificant x src = filterM (isSignificant x) src <&> take n
+    findSignificant x src = do
+      sigs <- filterM (isSignificant x) src
+      take 2 . map fst <$> f sigs
 
     isSignificant :: Monad m => DataAnalysis -> DataAnalysis -> CachedTed m Bool
     isSignificant x x' = do
       inputDiff <- compareDataAnalyses (\i -> i {parameters = (init . parameters) i}) x x'
       outputDiff <- compareDataAnalyses (last . parameters) x x'
-      return (inputDiff < outputDiff && outputDiff > 2)
+      return (inputDiff < outputDiff) -- && outputDiff > 2
 
 previewPinningExamples :: Monad m => ([DataAnalysis] -> CachedTed m [(DataAnalysis, Int)]) -> [DataAnalysis] -> Int -> CachedTed m ([DataAnalysis], [[DataAnalysis]])
 previewPinningExamples f xs n = do
@@ -101,6 +102,7 @@ previewPinningExamples f xs n = do
       -- return (inputDiff == 0 && outputDiff > 0) -- input pinning
 
 simpleSortBy :: Monad m => ExampleSorter m
+simpleSortBy _ [] = pure []
 simpleSortBy f xs =
     let
       r = [(minimumBy (comparing height) xs, 0)]
@@ -115,6 +117,7 @@ simpleSortBy f xs =
       return (r ++ [p], s \\ [fst p])
 
 tierSortBy :: Monad m => TierExampleSorter m
+tierSortBy _ [] = pure []
 tierSortBy f xs = do
     let r = minimumBy (comparing height) xs
     map (map fst) . groupOn snd . sortOn snd <$> mapM (\x -> fmap (x,) (compareDataAnalyses f r x)) xs
@@ -125,6 +128,7 @@ cherryPickByOutput g f xs = do
     mapM (fmap (take 3 . map fst). g (\x -> x {parameters = (init . parameters) x})) tiers <&> concat
 
 stochasticSimpleSortBy :: Monad m => ExampleSorter m
+stochasticSimpleSortBy _ [] = pure []
 stochasticSimpleSortBy f xs =
     let
       r = [(minimumBy (comparing height) xs, 0)]

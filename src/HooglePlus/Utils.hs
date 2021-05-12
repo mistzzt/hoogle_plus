@@ -123,11 +123,13 @@ printFilter :: String -> FilterState -> IO ()
 printFilter solution fs@FilterState{discardedSolutions, solutionDescriptions, differentiateExamples} = do
         putStrLn "\n*******************FILTER*********************"
         putStrLn $ "SOLN: " ++ solution
-        putStrLn "***IO Examples***"
-        putStrLn $ unlines $ zipWith (\ex sms -> printf "[Example] %s\r\n%s" ex (unlines sms)) ioExamples relatedExamples
+        -- putStrLn "***IO Examples***"
+        -- putStrLn $ unlines $ zipWith (\ex sms -> printf "[Example] %s\r\n%s" ex (unlines sms)) ioExamples relatedExamples
         putStrLn "***Diff Examples***"
-        putStrLn diffExamples
+        -- putStrLn diffExamples
+        -- putStrLn $ show fs
         putStrLn $ LB.unpack $ encodeWithPrefix (map (second (map (first show))) $ buildExperimentData fs)
+        -- putStrLn "ENDED"
         putStrLn "**********************************************\n"
     where
         diffExamples = unlines $ concatMap (\(soln, examples) -> ("- " ++ soln) : map (('\t':) . show) examples) (Map.toList differentiateExamples)

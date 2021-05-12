@@ -285,7 +285,7 @@ runChecks env goalType prog = do
 checkSolutionNotCrash :: MonadIO m => [String] -> FunctionSignature -> String -> FilterTest m Bool
 checkSolutionNotCrash modules funcSig solution = do
   result <- validateCandidate modules solution funcSig
-  modify $ \s -> s {solutionDescriptions = (solution, result) : solutionDescriptions s }
+  when (isSuccess result) (modify $ \s -> s {solutionDescriptions = (solution, result) : solutionDescriptions s })
   return $ isSuccess result
 
 checkDuplicates :: MonadIO m => [String] -> FunctionSignature -> String -> FilterTest m Bool
