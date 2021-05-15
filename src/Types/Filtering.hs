@@ -64,8 +64,8 @@ toExample :: InternalExample -> Example
 toExample (InternalExample params) = Example (map expr $ init params) (expr $ last params)
 
 data CandidateValidDesc =
-    Total   [InternalExample] [[InternalExample]]
-  | Partial [InternalExample] [[InternalExample]]
+    Total   [InternalExample] [[InternalExample]] [InternalExample]
+  | Partial [InternalExample] [[InternalExample]] [InternalExample]
   | Invalid
   | Unknown String
   deriving (Eq)
@@ -77,10 +77,10 @@ data CandidateDuplicateDesc =
 
 instance Show CandidateValidDesc where
   show = \case
-      Total   examples _ -> unlines $ map show examples
-      Partial examples _ -> unlines $ map show examples
-      Invalid            -> "<bottom>"
-      Unknown ex         -> "<exception> " ++ ex
+      Total   examples _ _ -> unlines $ map show examples
+      Partial examples _ _ -> unlines $ map show examples
+      Invalid              -> "<bottom>"
+      Unknown ex           -> "<exception> " ++ ex
 
 data ArgumentType =
     Concrete      String

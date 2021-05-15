@@ -26,6 +26,7 @@ import System.Timeout
 import Text.Printf
 import Data.Containers.ListUtils (nubOrd)
 import Data.List.Extra (splitOn)
+import Data.Tuple.Extra (uncurry3)
 import Data.UUID.V4 (nextRandom)
 
 import HooglePlus.Utils (splitConsecutive, extractSolution, printFilter)
@@ -227,8 +228,8 @@ validateCandidate modules solution funcSig = do
     readResult r = case fst r of
       QC.GaveUp{QC.numTests}
             | numTests == 0 -> Invalid
-            | otherwise     -> (uncurry Partial . selectExamples . concat . snd) r
-      QC.Success{}          -> (uncurry Total . selectExamples . concat . snd) r
+            | otherwise     -> (uncurry3 Partial . selectExamples . concat . snd) r
+      QC.Success{}          -> (uncurry3 Total . selectExamples . concat . snd) r
       _                     -> trace (show r) Invalid
 
 -- >>> (evalStateT (classifyCandidate ["Data.Either", "GHC.List", "Data.Maybe", "Data.Function"] "\\e f -> Data.Either.either f (GHC.List.head []) e" (instantiateSignature $ parseTypeString "Either a b -> (a -> b) -> b") ["\\e f -> Data.Either.fromRight (f (Data.Maybe.fromJust Data.Maybe.Nothing)) e", "\\e f -> Data.Either.either f Data.Function.id e"]) emptyFilterState) :: IO CandidateDuplicateDesc
@@ -320,14 +321,16 @@ showParams args = (plain, typed, analyses, unwrp)
     analyses =  "[" ++ intercalate ", " (formatIdx "(analyzeTop arg_%d)") ++ "]"
     formatIdx format = map ((printf format :: Int -> String) . fst) args'
 
-selectExamples :: [InternalExample] -> ([InternalExample], [[InternalExample]])
-selectExamples = bimap (take 10 . map unpackNodes) (take 10 . map (map unpackNodes)) . sortWithTreeDistVar . map packNodes -- take 10 . map (unpackNodes . fst) . sortWithTreeDistVar . map packNodes
+selectExamples :: [InternalExample] -> ([InternalExample], [[InternalExample]], [InternalExample])
+selectExamples xs = withInputVal ((bimap (take 10 . map unpackNodes) (take 10 . map (map unpackNodes)) . sortWithTreeDistVar . map packNodes) xs) xs
   where
     packNodes :: InternalExample -> DataAnalysis
     packNodes (InternalExample dts) = Instance "Root" "!" "" dts (1 + maximum (map height dts))
 
     unpackNodes :: DataAnalysis -> InternalExample
     unpackNodes (Instance _ _ _ dts _) = InternalExample dts
+
+    withInputVal (x, y) z = (x, y, z) 
 
 -- | Extract higher-order arguments from a type signature.
 -- >>> extractHigherOrderQuery $ parseTypeString "a -> (a -> b) -> [(a -> b -> c)] -> b"
