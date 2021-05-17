@@ -161,31 +161,31 @@ printFilter solution fs@FilterState{discardedSolutions, solutionDescriptions, di
         -- putStrLn $ unlines $ zipWith (\ex sms -> printf "[Example] %s\r\n%s" ex (unlines sms)) ioExamples relatedExamples
         putStrLn "***Diff Examples***"
         -- putStrLn diffExamples
+        v1 <- experimentDataSorted
+        v2 <- experimentDataShuffled
+        v3 <- experimentDataRandomExamples
         -- putStrLn $ show fs
-        putStrLn $ LB.unpack $ encodeWithPrefix (experimentDataSorted, experimentDataShuffled, experimentDataRandomExamples)
+        putStrLn $ LB.unpack $ encodeWithPrefix (v1, v2, v3)
         -- putStrLn "ENDED"
         putStrLn "**********************************************\n"
     where
         diffExamples = unlines $ concatMap (\(soln, examples) -> ("- " ++ soln) : map (('\t':) . show) examples) (Map.toList differentiateExamples)
         (ioExamples, relatedExamples)   = let (_, desc) = head $ filter ((== solution) . fst) solutionDescriptions in case desc of Total ex s _ -> (map show ex, map (map show) s); Partial ex s _ -> (map show ex, map (map show) s); _ -> ([], [])
 
-        experimentDataSorted = (map (second (map (first show))) . sortExperimentData . buildExperimentData extractDescriptionPlain) fs
-        experimentDataShuffled = (map (second (map (first show))) . shuffleExperimentData . buildExperimentData extractDescriptionPlain) fs
-        experimentDataRandomExamples = (map (second (map (first show))) . shuffleExperimentData . buildExperimentData extractDescriptionRandom) fs
+        experimentDataSorted = map (second (map (first show))) . sortExperimentData <$> buildExperimentData extractDescriptionPlain fs
+        experimentDataShuffled = map (second (map (first show))) <$> buildExperimentData extractDescriptionPlain fs
+        experimentDataRandomExamples = map (second (map (first show))) <$> buildExperimentData extractDescriptionRandom fs
 
         encodeWithPrefix obj = LB.append (LB.pack "EXPRMTS:") (A.encode obj)
 
-        buildExperimentData :: (CandidateValidDesc -> [(InternalExample, Int)]) -> FilterState -> [(String, [(InternalExample, Int)])]
+        buildExperimentData :: (CandidateValidDesc -> IO [(InternalExample, Int)]) -> FilterState -> IO [(String, [(InternalExample, Int)])]
         buildExperimentData f FilterState{solutionDescriptions, differentiateExamples} =
-            Map.toList $
-            Map.map (nubOrdOn (hash . fst)) $
-                Map.unionWith (++)
-                    (Map.fromList (map (second f) solutionDescriptions))
-                    (Map.map (map (,1 :: Int)) differentiateExamples)
+            (Map.toList . Map.map (nubOrdOn (hash . fst))) .
+                Map.unionWith (++) (Map.map (map (,1 :: Int)) differentiateExamples) <$>
+                    (Map.fromList <$> mapM (sequence . second f) solutionDescriptions)
 
-        shuffleExperimentData :: [(String, [(InternalExample, Int)])] -> [(String, [(InternalExample, Int)])]
-        -- shuffleExperimentData = mapM (sequence . second (getStdRandom . shuffle'))
-        shuffleExperimentData = map (second (unsafePerformIO . shuffleIO))
+        -- shuffleExperimentData :: [(String, [(InternalExample, Int)])] -> IO [(String, [(InternalExample, Int)])]
+        -- shuffleExperimentData = mapM (sequence . second shuffleIO)
 
         sortExperimentData :: [(String, [(InternalExample, Int)])] -> [(String, [(InternalExample, Int)])]
         sortExperimentData = map (second magicSort)
@@ -199,18 +199,19 @@ printFilter solution fs@FilterState{discardedSolutions, solutionDescriptions, di
                         map ((\x -> (x, queryKey x)) . unpackNodes) (sortWithTreeDistVarPlain $ map (packNodes . fst) xs)
 
         -- 0 plain; 1 distinguishing; 2 related (significant)
-        extractDescriptionPlain :: CandidateValidDesc -> [(InternalExample, Int)]
-        extractDescriptionPlain = \case
+        extractDescriptionPlain :: CandidateValidDesc -> IO [(InternalExample, Int)]
+        extractDescriptionPlain = return . \case
             Total ex s _ -> map (,0) ex ++ concatMap (map (,2)) s
             Partial ex s _ -> map (,0) ex ++ concatMap (map (,2)) s
             _ -> []
 
-        extractDescriptionRandom :: CandidateValidDesc -> [(InternalExample, Int)]
-        extractDescriptionRandom = \case
-            Total _ _ xs -> (take 10 . (unsafePerformIO . shuffleIO) . map (,0)) xs
-            Partial _ _ xs -> (take 10 . (unsafePerformIO . shuffleIO) . map (,0)) xs
-            _ -> []
-
+        extractDescriptionRandom :: CandidateValidDesc -> IO [(InternalExample, Int)]
+        extractDescriptionRandom desc =
+            let exs = case desc of
+                        Total _ _ xs -> map (,0) xs
+                        Partial _ _ xs -> map (,0) xs
+                        _ -> []
+            in take 10 <$> shuffleIO exs
 
         packNodes :: InternalExample -> DataAnalysis
         packNodes (InternalExample dts) = Instance "Root" "!" "" dts (1 + maximum (map height dts))
