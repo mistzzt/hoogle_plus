@@ -1,0 +1,3409 @@
+- name: firstJust
+  query: 'x: a -> xs: [Maybe a] -> a'
+  candidate: \x xs -> fromMaybe x (head xs)
+  sorted_examples:
+  - inputs:
+    - '9'
+    - '[Just -1,Just 3]'
+    output: '-1'
+  - inputs:
+    - '4'
+    - '[Just 9,Just 6,Just 0,Just 5,Just -2,Just 3]'
+    output: '9'
+  - inputs:
+    - '2'
+    - '[]'
+    output: 'Prelude.head: empty list'
+  - inputs:
+    - '10'
+    - '[Just 5,Nothing,Just -1,Just 9,Nothing]'
+    output: '5'
+  - inputs:
+    - '7'
+    - '[Nothing,Just 0,Nothing]'
+    output: '7'
+  - inputs:
+    - '9'
+    - '[Just 0,Nothing,Nothing,Just 4]'
+    output: '0'
+  - inputs:
+    - '8'
+    - '[Just 7,Just 5,Just 7,Just -2,Just -2]'
+    output: '7'
+  - inputs:
+    - '10'
+    - '[Nothing]'
+    output: '10'
+  - inputs:
+    - '5'
+    - '[Just 1]'
+    output: '1'
+  - inputs:
+    - '10'
+    - '[Just 7,Just 1,Just 4]'
+    output: '7'
+  - inputs:
+    - '-1'
+    - '[Nothing,Just 5,Just 10,Just 1,Just 9,Just 0]'
+    output: '-1'
+  unsorted_examples:
+  - inputs:
+    - '9'
+    - '[Just -1,Just 3]'
+    output: '-1'
+  - inputs:
+    - '-1'
+    - '[Nothing,Just 5,Just 10,Just 1,Just 9,Just 0]'
+    output: '-1'
+  - inputs:
+    - '2'
+    - '[]'
+    output: 'Prelude.head: empty list'
+  - inputs:
+    - '10'
+    - '[Nothing]'
+    output: '10'
+  - inputs:
+    - '4'
+    - '[Just 9,Just 6,Just 0,Just 5,Just -2,Just 3]'
+    output: '9'
+  - inputs:
+    - '9'
+    - '[Just 0,Nothing,Nothing,Just 4]'
+    output: '0'
+  - inputs:
+    - '7'
+    - '[Nothing,Just 0,Nothing]'
+    output: '7'
+  - inputs:
+    - '10'
+    - '[Just 5,Nothing,Just -1,Just 9,Nothing]'
+    output: '5'
+  - inputs:
+    - '8'
+    - '[Just 7,Just 5,Just 7,Just -2,Just -2]'
+    output: '7'
+  - inputs:
+    - '10'
+    - '[Just 7,Just 1,Just 4]'
+    output: '7'
+  - inputs:
+    - '5'
+    - '[Just 1]'
+    output: '1'
+  control_examples:
+  - inputs:
+    - '9'
+    - '[Just -1,Just 3]'
+    output: '-1'
+  - inputs:
+    - '-1'
+    - '[Nothing,Just 5,Just 10,Just 1,Just 9,Just 0]'
+    output: '-1'
+  - inputs:
+    - '2'
+    - '[]'
+    output: 'Prelude.head: empty list'
+  - inputs:
+    - '10'
+    - '[Nothing]'
+    output: '10'
+  - inputs:
+    - '2'
+    - '[Just 7]'
+    output: '7'
+- name: firstJust
+  query: 'x: a -> xs: [Maybe a] -> a'
+  candidate: \x xs -> fromMaybe x (last xs)
+  sorted_examples:
+  - inputs:
+    - '9'
+    - '[Just -1,Just 3]'
+    output: '3'
+  - inputs:
+    - '-1'
+    - '[Nothing,Just 5,Just 10,Just 1,Just 9,Just 0]'
+    output: '0'
+  - inputs:
+    - '6'
+    - '[Just 3,Just 4,Nothing,Nothing,Just 1]'
+    output: '1'
+  - inputs:
+    - '4'
+    - '[]'
+    output: 'Prelude.last: empty list'
+  - inputs:
+    - '5'
+    - '[Just 5,Nothing,Nothing,Just -2,Just -1]'
+    output: '-1'
+  - inputs:
+    - '6'
+    - '[Nothing]'
+    output: '6'
+  - inputs:
+    - '2'
+    - '[Nothing,Just 5,Just 8,Nothing,Just 6,Nothing]'
+    output: '2'
+  - inputs:
+    - '6'
+    - '[Nothing,Just 6,Nothing,Just 5]'
+    output: '5'
+  - inputs:
+    - '0'
+    - '[Nothing,Just -2,Just 6,Just 2,Just 6]'
+    output: '6'
+  - inputs:
+    - '3'
+    - '[Just 2,Just -1,Just 9,Nothing,Just 1]'
+    output: '1'
+  - inputs:
+    - '6'
+    - '[Nothing,Just 3]'
+    output: '3'
+  - inputs:
+    - '4'
+    - '[Just 2,Nothing,Nothing,Just -2,Nothing]'
+    output: '4'
+  unsorted_examples:
+  - inputs:
+    - '9'
+    - '[Just -1,Just 3]'
+    output: '3'
+  - inputs:
+    - '-1'
+    - '[Nothing,Just 5,Just 10,Just 1,Just 9,Just 0]'
+    output: '0'
+  - inputs:
+    - '4'
+    - '[]'
+    output: 'Prelude.last: empty list'
+  - inputs:
+    - '6'
+    - '[Nothing,Just 3]'
+    output: '3'
+  - inputs:
+    - '2'
+    - '[Nothing,Just 5,Just 8,Nothing,Just 6,Nothing]'
+    output: '2'
+  - inputs:
+    - '5'
+    - '[Just 5,Nothing,Nothing,Just -2,Just -1]'
+    output: '-1'
+  - inputs:
+    - '6'
+    - '[Just 3,Just 4,Nothing,Nothing,Just 1]'
+    output: '1'
+  - inputs:
+    - '0'
+    - '[Nothing,Just -2,Just 6,Just 2,Just 6]'
+    output: '6'
+  - inputs:
+    - '6'
+    - '[Nothing]'
+    output: '6'
+  - inputs:
+    - '4'
+    - '[Just 2,Nothing,Nothing,Just -2,Nothing]'
+    output: '4'
+  - inputs:
+    - '6'
+    - '[Nothing,Just 6,Nothing,Just 5]'
+    output: '5'
+  - inputs:
+    - '3'
+    - '[Just 2,Just -1,Just 9,Nothing,Just 1]'
+    output: '1'
+  control_examples:
+  - inputs:
+    - '9'
+    - '[Just -1,Just 3]'
+    output: '3'
+  - inputs:
+    - '-1'
+    - '[Nothing,Just 5,Just 10,Just 1,Just 9,Just 0]'
+    output: '0'
+  - inputs:
+    - '4'
+    - '[]'
+    output: 'Prelude.last: empty list'
+  - inputs:
+    - '6'
+    - '[Nothing,Just 3]'
+    output: '3'
+  - inputs:
+    - '1'
+    - '[Just 7]'
+    output: '7'
+  - inputs:
+    - '0'
+    - '[Nothing,Just -2,Just 6,Just 2,Just 6]'
+    output: '6'
+  - inputs:
+    - '6'
+    - '[Just 3,Just 4,Nothing,Nothing,Just 1]'
+    output: '1'
+- name: firstJust
+  query: 'x: a -> xs: [Maybe a] -> a'
+  candidate: \x xs -> fromMaybe x (listToMaybe (catMaybes xs))
+  sorted_examples:
+  - inputs:
+    - '4'
+    - '[]'
+    output: '4'
+  - inputs:
+    - '8'
+    - '[Just 9,Just 2,Just 7,Nothing,Just 2,Nothing]'
+    output: '9'
+  - inputs:
+    - '10'
+    - '[Nothing,Just -1,Nothing,Nothing]'
+    output: '-1'
+  - inputs:
+    - '7'
+    - '[Just 8,Nothing,Nothing,Just -2,Nothing,Just 8]'
+    output: '8'
+  - inputs:
+    - '10'
+    - '[Nothing,Just -1,Just 1,Just 3,Just 2,Just 4]'
+    output: '-1'
+  - inputs:
+    - '-1'
+    - '[Just -1,Just 1]'
+    output: '-1'
+  - inputs:
+    - '4'
+    - '[Just 7,Just -2,Nothing,Nothing,Just 5]'
+    output: '7'
+  - inputs:
+    - '7'
+    - '[Just 4,Nothing,Just 0,Just 1,Just 5]'
+    output: '4'
+  - inputs:
+    - '3'
+    - '[Nothing,Nothing,Just -2]'
+    output: '-2'
+  - inputs:
+    - '8'
+    - '[Just 4,Just 9,Just 10]'
+    output: '4'
+  - inputs:
+    - '9'
+    - '[Just 2]'
+    output: '2'
+  - inputs:
+    - '6'
+    - '[Nothing]'
+    output: '6'
+  - inputs:
+    - '2'
+    - '[Just 7,Just -1,Nothing,Just 8]'
+    output: '7'
+  unsorted_examples:
+  - inputs:
+    - '4'
+    - '[]'
+    output: '4'
+  - inputs:
+    - '9'
+    - '[Just 2]'
+    output: '2'
+  - inputs:
+    - '-1'
+    - '[Just -1,Just 1]'
+    output: '-1'
+  - inputs:
+    - '2'
+    - '[Just 7,Just -1,Nothing,Just 8]'
+    output: '7'
+  - inputs:
+    - '8'
+    - '[Just 4,Just 9,Just 10]'
+    output: '4'
+  - inputs:
+    - '10'
+    - '[Nothing,Just -1,Just 1,Just 3,Just 2,Just 4]'
+    output: '-1'
+  - inputs:
+    - '6'
+    - '[Nothing]'
+    output: '6'
+  - inputs:
+    - '8'
+    - '[Just 9,Just 2,Just 7,Nothing,Just 2,Nothing]'
+    output: '9'
+  - inputs:
+    - '10'
+    - '[Nothing,Just -1,Nothing,Nothing]'
+    output: '-1'
+  - inputs:
+    - '3'
+    - '[Nothing,Nothing,Just -2]'
+    output: '-2'
+  - inputs:
+    - '7'
+    - '[Just 8,Nothing,Nothing,Just -2,Nothing,Just 8]'
+    output: '8'
+  - inputs:
+    - '7'
+    - '[Just 4,Nothing,Just 0,Just 1,Just 5]'
+    output: '4'
+  - inputs:
+    - '4'
+    - '[Just 7,Just -2,Nothing,Nothing,Just 5]'
+    output: '7'
+  control_examples:
+  - inputs:
+    - '4'
+    - '[]'
+    output: '4'
+  - inputs:
+    - '9'
+    - '[Just 2]'
+    output: '2'
+  - inputs:
+    - '-1'
+    - '[Just -1,Just 1]'
+    output: '-1'
+  - inputs:
+    - '2'
+    - '[Just 7,Just -1,Nothing,Just 8]'
+    output: '7'
+  - inputs:
+    - '7'
+    - '[Nothing]'
+    output: '7'
+  - inputs:
+    - '9'
+    - '[Nothing,Just 9,Just 7]'
+    output: '9'
+  - inputs:
+    - '7'
+    - '[Just 6,Nothing]'
+    output: '6'
+  - inputs:
+    - '7'
+    - '[Just 8,Nothing,Nothing,Just -2,Nothing,Just 8]'
+    output: '8'
+- name: firstJust
+  query: 'x: a -> xs: [Maybe a] -> a'
+  candidate: \x xs -> foldl (head []) x xs
+  sorted_examples:
+  - inputs:
+    - '9'
+    - '[Just 2]'
+    output: 'Prelude.head: empty list'
+  - inputs:
+    - '5'
+    - '[Just 1,Just 7,Just -2,Just 2,Just 6]'
+    output: 'Prelude.head: empty list'
+  - inputs:
+    - '-2'
+    - '[Just 2,Nothing,Nothing,Nothing,Just 8]'
+    output: 'Prelude.head: empty list'
+  - inputs:
+    - '6'
+    - '[Just 5,Just 9,Just 10,Nothing]'
+    output: 'Prelude.head: empty list'
+  - inputs:
+    - '0'
+    - '[Nothing,Just 8,Nothing,Just -1]'
+    output: 'Prelude.head: empty list'
+  - inputs:
+    - '8'
+    - '[Nothing,Just 2,Nothing,Nothing,Nothing]'
+    output: 'Prelude.head: empty list'
+  - inputs:
+    - '9'
+    - '[Nothing,Just 5,Nothing,Just 0,Just 5,Just 8]'
+    output: 'Prelude.head: empty list'
+  - inputs:
+    - '5'
+    - '[Nothing,Nothing]'
+    output: 'Prelude.head: empty list'
+  - inputs:
+    - '0'
+    - '[]'
+    output: '0'
+  - inputs:
+    - '4'
+    - '[Just 9,Nothing,Just 10,Just 10]'
+    output: 'Prelude.head: empty list'
+  - inputs:
+    - '6'
+    - '[Nothing,Just 3]'
+    output: 'Prelude.head: empty list'
+  - inputs:
+    - '1'
+    - '[Nothing]'
+    output: diverge
+  unsorted_examples:
+  - inputs:
+    - '9'
+    - '[Just 2]'
+    output: 'Prelude.head: empty list'
+  - inputs:
+    - '6'
+    - '[Nothing,Just 3]'
+    output: 'Prelude.head: empty list'
+  - inputs:
+    - '0'
+    - '[]'
+    output: '0'
+  - inputs:
+    - '1'
+    - '[Nothing]'
+    output: diverge
+  - inputs:
+    - '9'
+    - '[Nothing,Just 5,Nothing,Just 0,Just 5,Just 8]'
+    output: 'Prelude.head: empty list'
+  - inputs:
+    - '6'
+    - '[Just 5,Just 9,Just 10,Nothing]'
+    output: 'Prelude.head: empty list'
+  - inputs:
+    - '-2'
+    - '[Just 2,Nothing,Nothing,Nothing,Just 8]'
+    output: 'Prelude.head: empty list'
+  - inputs:
+    - '5'
+    - '[Just 1,Just 7,Just -2,Just 2,Just 6]'
+    output: 'Prelude.head: empty list'
+  - inputs:
+    - '4'
+    - '[Just 9,Nothing,Just 10,Just 10]'
+    output: 'Prelude.head: empty list'
+  - inputs:
+    - '5'
+    - '[Nothing,Nothing]'
+    output: 'Prelude.head: empty list'
+  - inputs:
+    - '8'
+    - '[Nothing,Just 2,Nothing,Nothing,Nothing]'
+    output: 'Prelude.head: empty list'
+  - inputs:
+    - '0'
+    - '[Nothing,Just 8,Nothing,Just -1]'
+    output: 'Prelude.head: empty list'
+  control_examples:
+  - inputs:
+    - '9'
+    - '[Just 2]'
+    output: 'Prelude.head: empty list'
+  - inputs:
+    - '6'
+    - '[Nothing,Just 3]'
+    output: 'Prelude.head: empty list'
+  - inputs:
+    - '0'
+    - '[]'
+    output: '0'
+  - inputs:
+    - '1'
+    - '[Nothing]'
+    output: diverge
+  - inputs:
+    - '5'
+    - '[Just 5,Just 1]'
+    output: 'Prelude.head: empty list'
+  - inputs:
+    - '0'
+    - '[Just 9,Just 4,Just -2,Just -1]'
+    output: 'Prelude.head: empty list'
+- name: firstJust
+  query: 'x: a -> xs: [Maybe a] -> a'
+  candidate: \x xs -> foldl' (head []) x xs
+  sorted_examples:
+  - inputs:
+    - '1'
+    - '[Nothing]'
+    output: 'Prelude.head: empty list'
+  - inputs:
+    - '-2'
+    - '[Just 5,Just 0,Just 0,Nothing,Just 6]'
+    output: 'Prelude.head: empty list'
+  - inputs:
+    - '10'
+    - '[Nothing,Just 6,Nothing,Nothing,Just 10]'
+    output: 'Prelude.head: empty list'
+  - inputs:
+    - '3'
+    - '[Nothing,Just 5,Just 6,Just 2,Just 7,Just 5,Just 9]'
+    output: 'Prelude.head: empty list'
+  - inputs:
+    - '-1'
+    - '[Just -1,Just 1]'
+    output: 'Prelude.head: empty list'
+  - inputs:
+    - '8'
+    - '[Just 0,Nothing,Just 8,Nothing]'
+    output: 'Prelude.head: empty list'
+  - inputs:
+    - '9'
+    - '[Just -1,Just -1,Nothing,Nothing]'
+    output: 'Prelude.head: empty list'
+  - inputs:
+    - '8'
+    - '[Just 6,Just 3,Nothing,Just -1,Just -2]'
+    output: 'Prelude.head: empty list'
+  - inputs:
+    - '-2'
+    - '[Nothing,Nothing,Nothing]'
+    output: 'Prelude.head: empty list'
+  - inputs:
+    - '7'
+    - '[]'
+    output: '7'
+  - inputs:
+    - '8'
+    - '[Just 4]'
+    output: 'Prelude.head: empty list'
+  - inputs:
+    - '-1'
+    - '[Nothing,Just 0,Just -1]'
+    output: 'Prelude.head: empty list'
+  - inputs:
+    - '2'
+    - '[Just 7,Just -1,Nothing,Just 8]'
+    output: 'Prelude.head: empty list'
+  unsorted_examples:
+  - inputs:
+    - '1'
+    - '[Nothing]'
+    output: 'Prelude.head: empty list'
+  - inputs:
+    - '-1'
+    - '[Just -1,Just 1]'
+    output: 'Prelude.head: empty list'
+  - inputs:
+    - '2'
+    - '[Just 7,Just -1,Nothing,Just 8]'
+    output: 'Prelude.head: empty list'
+  - inputs:
+    - '7'
+    - '[]'
+    output: '7'
+  - inputs:
+    - '-1'
+    - '[Nothing,Just 0,Just -1]'
+    output: 'Prelude.head: empty list'
+  - inputs:
+    - '3'
+    - '[Nothing,Just 5,Just 6,Just 2,Just 7,Just 5,Just 9]'
+    output: 'Prelude.head: empty list'
+  - inputs:
+    - '-2'
+    - '[Just 5,Just 0,Just 0,Nothing,Just 6]'
+    output: 'Prelude.head: empty list'
+  - inputs:
+    - '-2'
+    - '[Nothing,Nothing,Nothing]'
+    output: 'Prelude.head: empty list'
+  - inputs:
+    - '8'
+    - '[Just 0,Nothing,Just 8,Nothing]'
+    output: 'Prelude.head: empty list'
+  - inputs:
+    - '8'
+    - '[Just 4]'
+    output: 'Prelude.head: empty list'
+  - inputs:
+    - '8'
+    - '[Just 6,Just 3,Nothing,Just -1,Just -2]'
+    output: 'Prelude.head: empty list'
+  - inputs:
+    - '9'
+    - '[Just -1,Just -1,Nothing,Nothing]'
+    output: 'Prelude.head: empty list'
+  - inputs:
+    - '10'
+    - '[Nothing,Just 6,Nothing,Nothing,Just 10]'
+    output: 'Prelude.head: empty list'
+  control_examples:
+  - inputs:
+    - '1'
+    - '[Nothing]'
+    output: 'Prelude.head: empty list'
+  - inputs:
+    - '-1'
+    - '[Just -1,Just 1]'
+    output: 'Prelude.head: empty list'
+  - inputs:
+    - '2'
+    - '[Just 7,Just -1,Nothing,Just 8]'
+    output: 'Prelude.head: empty list'
+  - inputs:
+    - '7'
+    - '[]'
+    output: '7'
+  - inputs:
+    - '-1'
+    - '[Just 4]'
+    output: 'Prelude.head: empty list'
+  - inputs:
+    - '10'
+    - '[Just 10,Just 3,Just 2]'
+    output: 'Prelude.head: empty list'
+  - inputs:
+    - '1'
+    - '[Nothing,Just 0]'
+    output: 'Prelude.head: empty list'
+  - inputs:
+    - '6'
+    - '[Just 1,Nothing]'
+    output: 'Prelude.head: empty list'
+- name: mbToEither
+  query: 'x: a -> mb: Maybe b -> Either a b'
+  candidate: \x mb -> maybe (Left x) Right mb
+  sorted_examples:
+  - inputs:
+    - '2'
+    - Just "dd"
+    output: Right "dd"
+  - inputs:
+    - '3'
+    - Nothing
+    output: Left 3
+  unsorted_examples:
+  - inputs:
+    - '2'
+    - Just "dd"
+    output: Right "dd"
+  - inputs:
+    - '3'
+    - Nothing
+    output: Left 3
+  control_examples:
+  - inputs:
+    - '2'
+    - Just "dd"
+    output: Right "dd"
+  - inputs:
+    - '8'
+    - Nothing
+    output: Left 8
+- name: mbToEither
+  query: 'x: a -> mb: Maybe b -> Either a b'
+  candidate: \x mb -> bool (Left x) (Left x) (isJust mb)
+  sorted_examples:
+  - inputs:
+    - '2'
+    - Just "dd"
+    output: Left 2
+  - inputs:
+    - '1'
+    - Nothing
+    output: Left 1
+  unsorted_examples:
+  - inputs:
+    - '2'
+    - Just "dd"
+    output: Left 2
+  - inputs:
+    - '1'
+    - Nothing
+    output: Left 1
+  control_examples:
+  - inputs:
+    - '2'
+    - Just "dd"
+    output: Left 2
+  - inputs:
+    - '3'
+    - Nothing
+    output: Left 3
+- name: mbToEither
+  query: 'x: a -> mb: Maybe b -> Either a b'
+  candidate: \x mb -> maybe (Left x) (fromJust Nothing) mb
+  sorted_examples:
+  - inputs:
+    - '0'
+    - Just "ad"
+    output: "Maybe.fromJust: Nothing\nCallStack (from HasCallStack):\n  error, called\
+      \ at libraries/base/Data/Maybe.hs:148:21 in base:Data.Maybe\n  fromJust, called\
+      \ at <interactive>:2:66 in interactive:Ghci1"
+  - inputs:
+    - '9'
+    - Nothing
+    output: Left 9
+  unsorted_examples:
+  - inputs:
+    - '0'
+    - Just "ad"
+    output: "Maybe.fromJust: Nothing\nCallStack (from HasCallStack):\n  error, called\
+      \ at libraries/base/Data/Maybe.hs:148:21 in base:Data.Maybe\n  fromJust, called\
+      \ at <interactive>:2:66 in interactive:Ghci1"
+  - inputs:
+    - '9'
+    - Nothing
+    output: Left 9
+  control_examples:
+  - inputs:
+    - '0'
+    - Just "ad"
+    output: "Maybe.fromJust: Nothing\nCallStack (from HasCallStack):\n  error, called\
+      \ at libraries/base/Data/Maybe.hs:148:21 in base:Data.Maybe\n  fromJust, called\
+      \ at <interactive>:2:66 in interactive:Ghci1"
+  - inputs:
+    - '9'
+    - Nothing
+    output: Left 9
+- name: dedupe
+  query: 'Eq a => xs: [a] -> [a]'
+  candidate: \xs -> concat (group xs)
+  sorted_examples:
+  - inputs:
+    - '[]'
+    output: '[]'
+  - inputs:
+    - '[1,4,-4,-1,-4,5]'
+    output: '[1, 4, -4, -1, -4, 5]'
+  - inputs:
+    - '[0,4,2,1]'
+    output: '[0, 4, 2, 1]'
+  - inputs:
+    - '[-3,-1,1,-3]'
+    output: '[-3, -1, 1, -3]'
+  - inputs:
+    - '[2,0,-5,4]'
+    output: '[2, 0, -5, 4]'
+  - inputs:
+    - '[0,0]'
+    output: '[0, 0]'
+  - inputs:
+    - '[-3,0,-1]'
+    output: '[-3, 0, -1]'
+  - inputs:
+    - '[3,-1,-6,5,6]'
+    output: '[3, -1, -6, 5, 6]'
+  - inputs:
+    - '[5,4,6,-5]'
+    output: '[5, 4, 6, -5]'
+  - inputs:
+    - '[0,-5,5,-3,3]'
+    output: '[0, -5, 5, -3, 3]'
+  - inputs:
+    - '[-3,3,2]'
+    output: '[-3, 3, 2]'
+  - inputs:
+    - '[-1,1]'
+    output: diverge
+  - inputs:
+    - '[-3,-3,-1]'
+    output: '[-3, -3, -1]'
+  - inputs:
+    - '[2,2,3]'
+    output: '[2, 2, 3]'
+  - inputs:
+    - '[1]'
+    output: '[1]'
+  - inputs:
+    - '[-3,-1]'
+    output: '[-3, -1]'
+  unsorted_examples:
+  - inputs:
+    - '[1]'
+    output: '[1]'
+  - inputs:
+    - '[-3,3,2]'
+    output: '[-3, 3, 2]'
+  - inputs:
+    - '[]'
+    output: '[]'
+  - inputs:
+    - '[-3,-1]'
+    output: '[-3, -1]'
+  - inputs:
+    - '[2,2,3]'
+    output: '[2, 2, 3]'
+  - inputs:
+    - '[-3,-3,-1]'
+    output: '[-3, -3, -1]'
+  - inputs:
+    - '[1,4,-4,-1,-4,5]'
+    output: '[1, 4, -4, -1, -4, 5]'
+  - inputs:
+    - '[-3,0,-1]'
+    output: '[-3, 0, -1]'
+  - inputs:
+    - '[5,4,6,-5]'
+    output: '[5, 4, 6, -5]'
+  - inputs:
+    - '[0,-5,5,-3,3]'
+    output: '[0, -5, 5, -3, 3]'
+  - inputs:
+    - '[2,0,-5,4]'
+    output: '[2, 0, -5, 4]'
+  - inputs:
+    - '[0,4,2,1]'
+    output: '[0, 4, 2, 1]'
+  - inputs:
+    - '[0,0]'
+    output: '[0, 0]'
+  - inputs:
+    - '[-3,-1,1,-3]'
+    output: '[-3, -1, 1, -3]'
+  - inputs:
+    - '[3,-1,-6,5,6]'
+    output: '[3, -1, -6, 5, 6]'
+  - inputs:
+    - '[-1,1]'
+    output: diverge
+  control_examples:
+  - inputs:
+    - '[1]'
+    output: '[1]'
+  - inputs:
+    - '[-3,3,2]'
+    output: '[-3, 3, 2]'
+  - inputs:
+    - '[]'
+    output: '[]'
+  - inputs:
+    - '[-3,-1]'
+    output: '[-3, -1]'
+  - inputs:
+    - '[2,2,3]'
+    output: '[2, 2, 3]'
+  - inputs:
+    - '[-3,-3,-1]'
+    output: '[-3, -3, -1]'
+  - inputs:
+    - '[1,4,-4,-1,-4,5]'
+    output: '[1, 4, -4, -1, -4, 5]'
+  - inputs:
+    - '[3,0,2]'
+    output: '[3, 0, 2]'
+  - inputs:
+    - '[0]'
+    output: '[0]'
+  - inputs:
+    - '[0,0]'
+    output: '[0, 0]'
+  - inputs:
+    - '[-5,4,-2,3]'
+    output: '[-5, 4, -2, 3]'
+- name: dedupe
+  query: 'Eq a => xs: [a] -> [a]'
+  candidate: \xs -> head (group xs)
+  sorted_examples:
+  - inputs:
+    - '[]'
+    output: 'Prelude.head: empty list'
+  - inputs:
+    - '[-1,-2,-6,6,-5,6]'
+    output: '[-1]'
+  - inputs:
+    - '[2,1,5,1,2]'
+    output: '[2]'
+  - inputs:
+    - '[-3,-3]'
+    output: '[-3, -3]'
+  - inputs:
+    - '[2,-1,-1,-5]'
+    output: '[2]'
+  - inputs:
+    - '[-3,3,2]'
+    output: '[-3]'
+  - inputs:
+    - '[0,3,-1,0]'
+    output: '[0]'
+  - inputs:
+    - '[-1,0,-3,-2,-1]'
+    output: '[-1]'
+  - inputs:
+    - '[4]'
+    output: '[4]'
+  - inputs:
+    - '[-1,-5,-6]'
+    output: '[-1]'
+  - inputs:
+    - '[-1]'
+    output: '[-1]'
+  - inputs:
+    - '[0]'
+    output: '[0]'
+  - inputs:
+    - '[5,4,0,4]'
+    output: '[5]'
+  - inputs:
+    - '[-1,0,4,5,3]'
+    output: '[-1]'
+  - inputs:
+    - '[5,4,1,-3]'
+    output: '[5]'
+  - inputs:
+    - '[2,1]'
+    output: '[2]'
+  - inputs:
+    - '[2,-3]'
+    output: '[2]'
+  - inputs:
+    - '[-1,3,-3]'
+    output: '[-1]'
+  unsorted_examples:
+  - inputs:
+    - '[-1,3,-3]'
+    output: '[-1]'
+  - inputs:
+    - '[]'
+    output: 'Prelude.head: empty list'
+  - inputs:
+    - '[-3,3,2]'
+    output: '[-3]'
+  - inputs:
+    - '[-1,-5,-6]'
+    output: '[-1]'
+  - inputs:
+    - '[5,4,1,-3]'
+    output: '[5]'
+  - inputs:
+    - '[-1]'
+    output: '[-1]'
+  - inputs:
+    - '[5,4,0,4]'
+    output: '[5]'
+  - inputs:
+    - '[-1,-2,-6,6,-5,6]'
+    output: '[-1]'
+  - inputs:
+    - '[-3,-3]'
+    output: '[-3, -3]'
+  - inputs:
+    - '[0,3,-1,0]'
+    output: '[0]'
+  - inputs:
+    - '[2,-1,-1,-5]'
+    output: '[2]'
+  - inputs:
+    - '[-1,0,4,5,3]'
+    output: '[-1]'
+  - inputs:
+    - '[0]'
+    output: '[0]'
+  - inputs:
+    - '[-1,0,-3,-2,-1]'
+    output: '[-1]'
+  - inputs:
+    - '[2,1,5,1,2]'
+    output: '[2]'
+  - inputs:
+    - '[2,1]'
+    output: '[2]'
+  - inputs:
+    - '[4]'
+    output: '[4]'
+  - inputs:
+    - '[2,-3]'
+    output: '[2]'
+  control_examples:
+  - inputs:
+    - '[-1,3,-3]'
+    output: '[-1]'
+  - inputs:
+    - '[]'
+    output: 'Prelude.head: empty list'
+  - inputs:
+    - '[-3,3,2]'
+    output: '[-3]'
+  - inputs:
+    - '[-1,-5,-6]'
+    output: '[-1]'
+  - inputs:
+    - '[5,4,1,-3]'
+    output: '[5]'
+  - inputs:
+    - '[-1]'
+    output: '[-1]'
+  - inputs:
+    - '[5,4,0,4]'
+    output: '[5]'
+  - inputs:
+    - '[3,-2,3]'
+    output: '[3]'
+  - inputs:
+    - '[-4,3]'
+    output: '[-4]'
+  - inputs:
+    - '[0]'
+    output: '[0]'
+- name: dedupe
+  query: 'Eq a => xs: [a] -> [a]'
+  candidate: \xs -> last (group xs)
+  sorted_examples:
+  - inputs:
+    - '[]'
+    output: 'Prelude.last: empty list'
+  - inputs:
+    - '[5,1,1,-5,-4]'
+    output: '[-4]'
+  - inputs:
+    - '[1,1]'
+    output: '[1, 1]'
+  - inputs:
+    - '[-3,4,4,0,2]'
+    output: '[2]'
+  - inputs:
+    - '[0,0]'
+    output: '[0, 0]'
+  - inputs:
+    - '[-1,-1]'
+    output: '[-1, -1]'
+  - inputs:
+    - '[-1,-3,3]'
+    output: '[3]'
+  - inputs:
+    - '[-6,-5,-6,-4]'
+    output: '[-4]'
+  - inputs:
+    - '[6]'
+    output: '[6]'
+  - inputs:
+    - '[2,4,-3,6]'
+    output: '[6]'
+  - inputs:
+    - '[1,-2,4,-2]'
+    output: '[-2]'
+  - inputs:
+    - '[0,2]'
+    output: '[2]'
+  - inputs:
+    - '[-3,-1]'
+    output: '[-1]'
+  - inputs:
+    - '[-1,-5,-6]'
+    output: '[-6]'
+  - inputs:
+    - '[-6,3,-4]'
+    output: '[-4]'
+  - inputs:
+    - '[-2,4,4]'
+    output: '[4, 4]'
+  - inputs:
+    - '[-3,1]'
+    output: '[1]'
+  - inputs:
+    - '[5,4,1,-3]'
+    output: '[-3]'
+  - inputs:
+    - '[0,-4,3]'
+    output: '[3]'
+  unsorted_examples:
+  - inputs:
+    - '[-3,1]'
+    output: '[1]'
+  - inputs:
+    - '[]'
+    output: 'Prelude.last: empty list'
+  - inputs:
+    - '[-1,-5,-6]'
+    output: '[-6]'
+  - inputs:
+    - '[5,4,1,-3]'
+    output: '[-3]'
+  - inputs:
+    - '[-3,-1]'
+    output: '[-1]'
+  - inputs:
+    - '[-6,3,-4]'
+    output: '[-4]'
+  - inputs:
+    - '[0,-4,3]'
+    output: '[3]'
+  - inputs:
+    - '[6]'
+    output: '[6]'
+  - inputs:
+    - '[-3,4,4,0,2]'
+    output: '[2]'
+  - inputs:
+    - '[1,1]'
+    output: '[1, 1]'
+  - inputs:
+    - '[-6,-5,-6,-4]'
+    output: '[-4]'
+  - inputs:
+    - '[0,2]'
+    output: '[2]'
+  - inputs:
+    - '[5,1,1,-5,-4]'
+    output: '[-4]'
+  - inputs:
+    - '[0,0]'
+    output: '[0, 0]'
+  - inputs:
+    - '[-2,4,4]'
+    output: '[4, 4]'
+  - inputs:
+    - '[-1,-1]'
+    output: '[-1, -1]'
+  - inputs:
+    - '[2,4,-3,6]'
+    output: '[6]'
+  - inputs:
+    - '[-1,-3,3]'
+    output: '[3]'
+  - inputs:
+    - '[1,-2,4,-2]'
+    output: '[-2]'
+  control_examples:
+  - inputs:
+    - '[-3,1]'
+    output: '[1]'
+  - inputs:
+    - '[]'
+    output: 'Prelude.last: empty list'
+  - inputs:
+    - '[-1,-5,-6]'
+    output: '[-6]'
+  - inputs:
+    - '[5,4,1,-3]'
+    output: '[-3]'
+  - inputs:
+    - '[-3,-1]'
+    output: '[-1]'
+  - inputs:
+    - '[-6,3,-4]'
+    output: '[-4]'
+  - inputs:
+    - '[0,-4,3]'
+    output: '[3]'
+  - inputs:
+    - '[6]'
+    output: '[6]'
+  - inputs:
+    - '[-3,4,4,0,2]'
+    output: '[2]'
+  - inputs:
+    - '[1,1]'
+    output: '[1, 1]'
+  - inputs:
+    - '[5,-5,3,-1,-1]'
+    output: '[-1, -1]'
+  - inputs:
+    - '[5,1,6,3,-6]'
+    output: '[-6]'
+  - inputs:
+    - '[0,2]'
+    output: '[2]'
+  - inputs:
+    - '[-4,0]'
+    output: '[0]'
+- name: dedupe
+  query: 'Eq a => xs: [a] -> [a]'
+  candidate: \xs -> concat (group (init xs))
+  sorted_examples:
+  - inputs:
+    - '[]'
+    output: 'Prelude.init: empty list'
+  - inputs:
+    - '[5,4,1,-3,5,-5]'
+    output: '[5, 4, 1, -3, 5]'
+  - inputs:
+    - '[0,-4,3,1]'
+    output: '[0, -4, 3]'
+  - inputs:
+    - '[6,0,4]'
+    output: '[6, 0]'
+  - inputs:
+    - '[-2,-4,-4]'
+    output: '[-2, -4]'
+  - inputs:
+    - '[-5,4,3,5,1]'
+    output: '[-5, 4, 3, 5]'
+  - inputs:
+    - '[4,-6,3,3,2]'
+    output: '[4, -6, 3, 3]'
+  - inputs:
+    - '[3,1,-3,2]'
+    output: '[3, 1, -3]'
+  - inputs:
+    - '[-4,0,0]'
+    output: '[-4, 0]'
+  - inputs:
+    - '[2,3,0]'
+    output: '[2, 3]'
+  - inputs:
+    - '[0,0,-2]'
+    output: '[0, 0]'
+  - inputs:
+    - '[0,3,4,-6,-5]'
+    output: '[0, 3, 4, -6]'
+  - inputs:
+    - '[0,-4,3]'
+    output: '[0, -4]'
+  - inputs:
+    - '[-1]'
+    output: '[]'
+  - inputs:
+    - '[-6,3,-4]'
+    output: '[-6, 3]'
+  - inputs:
+    - '[4,5,-6,-1,3,-1]'
+    output: '[4, 5, -6, -1, 3]'
+  - inputs:
+    - '[2,-2,-4,4]'
+    output: '[2, -2, -4]'
+  unsorted_examples:
+  - inputs:
+    - '[2,3,0]'
+    output: '[2, 3]'
+  - inputs:
+    - '[]'
+    output: 'Prelude.init: empty list'
+  - inputs:
+    - '[-6,3,-4]'
+    output: '[-6, 3]'
+  - inputs:
+    - '[0,-4,3]'
+    output: '[0, -4]'
+  - inputs:
+    - '[-1]'
+    output: '[]'
+  - inputs:
+    - '[5,4,1,-3,5,-5]'
+    output: '[5, 4, 1, -3, 5]'
+  - inputs:
+    - '[2,-2,-4,4]'
+    output: '[2, -2, -4]'
+  - inputs:
+    - '[-2,-4,-4]'
+    output: '[-2, -4]'
+  - inputs:
+    - '[4,5,-6,-1,3,-1]'
+    output: '[4, 5, -6, -1, 3]'
+  - inputs:
+    - '[0,-4,3,1]'
+    output: '[0, -4, 3]'
+  - inputs:
+    - '[0,3,4,-6,-5]'
+    output: '[0, 3, 4, -6]'
+  - inputs:
+    - '[6,0,4]'
+    output: '[6, 0]'
+  - inputs:
+    - '[-5,4,3,5,1]'
+    output: '[-5, 4, 3, 5]'
+  - inputs:
+    - '[-4,0,0]'
+    output: '[-4, 0]'
+  - inputs:
+    - '[4,-6,3,3,2]'
+    output: '[4, -6, 3, 3]'
+  - inputs:
+    - '[0,0,-2]'
+    output: '[0, 0]'
+  - inputs:
+    - '[3,1,-3,2]'
+    output: '[3, 1, -3]'
+  control_examples:
+  - inputs:
+    - '[2,3,0]'
+    output: '[2, 3]'
+  - inputs:
+    - '[]'
+    output: 'Prelude.init: empty list'
+  - inputs:
+    - '[-6,3,-4]'
+    output: '[-6, 3]'
+  - inputs:
+    - '[0,-4,3]'
+    output: '[0, -4]'
+  - inputs:
+    - '[-1]'
+    output: '[]'
+  - inputs:
+    - '[5,4,1,-3,5,-5]'
+    output: '[5, 4, 1, -3, 5]'
+  - inputs:
+    - '[2,-2,-4,4]'
+    output: '[2, -2, -4]'
+  - inputs:
+    - '[-2,-4,-4]'
+    output: '[-2, -4]'
+  - inputs:
+    - '[-1,-4]'
+    output: '[-1]'
+- name: dedupe
+  query: 'Eq a => xs: [a] -> [a]'
+  candidate: \xs -> head (group (init xs))
+  sorted_examples:
+  - inputs:
+    - '[]'
+    output: 'Prelude.init: empty list'
+  - inputs:
+    - '[2,2,3,6,2,-1]'
+    output: '[2, 2]'
+  - inputs:
+    - '[-4,1,-4]'
+    output: '[-4]'
+  - inputs:
+    - '[3,-3,1]'
+    output: '[3]'
+  - inputs:
+    - '[4,4,1,0]'
+    output: '[4, 4]'
+  - inputs:
+    - '[0,2,3,-3]'
+    output: '[0]'
+  - inputs:
+    - '[1,2,5,2]'
+    output: '[1]'
+  - inputs:
+    - '[-1,-5,-6,-2]'
+    output: '[-1]'
+  - inputs:
+    - '[1,0]'
+    output: '[1]'
+  - inputs:
+    - '[5,4,1,-3,5,-5]'
+    output: '[5]'
+  - inputs:
+    - '[-1,0]'
+    output: '[-1]'
+  - inputs:
+    - '[1,-1]'
+    output: '[1]'
+  - inputs:
+    - '[-2]'
+    output: 'Prelude.head: empty list'
+  - inputs:
+    - '[6]'
+    output: 'Prelude.head: empty list'
+  - inputs:
+    - '[2,-2,-4,4]'
+    output: '[2]'
+  - inputs:
+    - '[0]'
+    output: 'Prelude.head: empty list'
+  - inputs:
+    - '[-2,2]'
+    output: '[-2]'
+  - inputs:
+    - '[-5,-2]'
+    output: '[-5]'
+  - inputs:
+    - '[2,2,3]'
+    output: '[2, 2]'
+  unsorted_examples:
+  - inputs:
+    - '[3,-3,1]'
+    output: '[3]'
+  - inputs:
+    - '[]'
+    output: 'Prelude.init: empty list'
+  - inputs:
+    - '[5,4,1,-3,5,-5]'
+    output: '[5]'
+  - inputs:
+    - '[2,-2,-4,4]'
+    output: '[2]'
+  - inputs:
+    - '[6]'
+    output: 'Prelude.head: empty list'
+  - inputs:
+    - '[-5,-2]'
+    output: '[-5]'
+  - inputs:
+    - '[-2]'
+    output: 'Prelude.head: empty list'
+  - inputs:
+    - '[2,2,3]'
+    output: '[2, 2]'
+  - inputs:
+    - '[-1,-5,-6,-2]'
+    output: '[-1]'
+  - inputs:
+    - '[-4,1,-4]'
+    output: '[-4]'
+  - inputs:
+    - '[2,2,3,6,2,-1]'
+    output: '[2, 2]'
+  - inputs:
+    - '[0,2,3,-3]'
+    output: '[0]'
+  - inputs:
+    - '[1,0]'
+    output: '[1]'
+  - inputs:
+    - '[1,2,5,2]'
+    output: '[1]'
+  - inputs:
+    - '[-2,2]'
+    output: '[-2]'
+  - inputs:
+    - '[4,4,1,0]'
+    output: '[4, 4]'
+  - inputs:
+    - '[1,-1]'
+    output: '[1]'
+  - inputs:
+    - '[0]'
+    output: 'Prelude.head: empty list'
+  - inputs:
+    - '[-1,0]'
+    output: '[-1]'
+  control_examples:
+  - inputs:
+    - '[3,-3,1]'
+    output: '[3]'
+  - inputs:
+    - '[]'
+    output: 'Prelude.init: empty list'
+  - inputs:
+    - '[5,4,1,-3,5,-5]'
+    output: '[5]'
+  - inputs:
+    - '[2,-2,-4,4]'
+    output: '[2]'
+  - inputs:
+    - '[6]'
+    output: 'Prelude.head: empty list'
+  - inputs:
+    - '[-5,-2]'
+    output: '[-5]'
+  - inputs:
+    - '[-2]'
+    output: 'Prelude.head: empty list'
+  - inputs:
+    - '[2,2,3]'
+    output: '[2, 2]'
+  - inputs:
+    - '[-1,-5,-6,-2]'
+    output: '[-1]'
+  - inputs:
+    - '[-4,1,-4]'
+    output: '[-4]'
+  - inputs:
+    - '[0]'
+    output: 'Prelude.head: empty list'
+  - inputs:
+    - '[2,2]'
+    output: '[2]'
+  - inputs:
+    - '[1,2,5,2]'
+    output: '[1]'
+- name: dedupe
+  query: 'Eq a => xs: [a] -> [a]'
+  candidate: \xs -> last (group (init xs))
+  sorted_examples:
+  - inputs:
+    - '[1]'
+    output: 'Prelude.last: empty list'
+  - inputs:
+    - '[-1,-5,-6,-2]'
+    output: '[-6]'
+  - inputs:
+    - '[5,4,0,4]'
+    output: '[0]'
+  - inputs:
+    - '[1,1]'
+    output: '[1]'
+  - inputs:
+    - '[-1,0]'
+    output: '[-1]'
+  - inputs:
+    - '[0,2]'
+    output: '[0]'
+  - inputs:
+    - '[3,-2,-3]'
+    output: '[-2]'
+  - inputs:
+    - '[-5,-1,3,-1,1]'
+    output: '[-1]'
+  - inputs:
+    - '[-3,-3,-1]'
+    output: '[-3, -3]'
+  - inputs:
+    - '[-4,1,-4]'
+    output: '[1]'
+  - inputs:
+    - '[-3,4,4,0,2]'
+    output: '[0]'
+  - inputs:
+    - '[]'
+    output: 'Prelude.init: empty list'
+  - inputs:
+    - '[-4,0,-2]'
+    output: '[0]'
+  - inputs:
+    - '[-2,-4,-4]'
+    output: '[-4]'
+  - inputs:
+    - '[2,0]'
+    output: '[2]'
+  - inputs:
+    - '[-2,2]'
+    output: '[-2]'
+  - inputs:
+    - '[-1]'
+    output: 'Prelude.last: empty list'
+  - inputs:
+    - '[-3,1,2]'
+    output: '[1]'
+  - inputs:
+    - '[6,2,-1,0,3]'
+    output: '[0]'
+  - inputs:
+    - '[0]'
+    output: 'Prelude.last: empty list'
+  unsorted_examples:
+  - inputs:
+    - '[1]'
+    output: 'Prelude.last: empty list'
+  - inputs:
+    - '[]'
+    output: 'Prelude.init: empty list'
+  - inputs:
+    - '[-1,-5,-6,-2]'
+    output: '[-6]'
+  - inputs:
+    - '[-4,1,-4]'
+    output: '[1]'
+  - inputs:
+    - '[-2,-4,-4]'
+    output: '[-4]'
+  - inputs:
+    - '[-1]'
+    output: 'Prelude.last: empty list'
+  - inputs:
+    - '[-3,4,4,0,2]'
+    output: '[0]'
+  - inputs:
+    - '[1,1]'
+    output: '[1]'
+  - inputs:
+    - '[5,4,0,4]'
+    output: '[0]'
+  - inputs:
+    - '[-3,-3,-1]'
+    output: '[-3, -3]'
+  - inputs:
+    - '[-3,1,2]'
+    output: '[1]'
+  - inputs:
+    - '[-1,0]'
+    output: '[-1]'
+  - inputs:
+    - '[-5,-1,3,-1,1]'
+    output: '[-1]'
+  - inputs:
+    - '[6,2,-1,0,3]'
+    output: '[0]'
+  - inputs:
+    - '[0,2]'
+    output: '[0]'
+  - inputs:
+    - '[3,-2,-3]'
+    output: '[-2]'
+  - inputs:
+    - '[2,0]'
+    output: '[2]'
+  - inputs:
+    - '[0]'
+    output: 'Prelude.last: empty list'
+  - inputs:
+    - '[-4,0,-2]'
+    output: '[0]'
+  - inputs:
+    - '[-2,2]'
+    output: '[-2]'
+  control_examples:
+  - inputs:
+    - '[1]'
+    output: 'Prelude.last: empty list'
+  - inputs:
+    - '[]'
+    output: 'Prelude.init: empty list'
+  - inputs:
+    - '[-1,-5,-6,-2]'
+    output: '[-6]'
+  - inputs:
+    - '[-4,1,-4]'
+    output: '[1]'
+  - inputs:
+    - '[-2,-4,-4]'
+    output: '[-4]'
+  - inputs:
+    - '[-1]'
+    output: 'Prelude.last: empty list'
+  - inputs:
+    - '[-3,4,4,0,2]'
+    output: '[0]'
+  - inputs:
+    - '[1,1]'
+    output: '[1]'
+  - inputs:
+    - '[5,4,0,4]'
+    output: '[0]'
+  - inputs:
+    - '[-3,-3,-1]'
+    output: '[-3, -3]'
+  - inputs:
+    - '[0]'
+    output: 'Prelude.last: empty list'
+  - inputs:
+    - '[-4,0,-2]'
+    output: '[0]'
+- name: mapEither
+  query: 'f: (a -> Either b c) -> xs: [a] -> ([b], [c])'
+  candidate: \f xs -> partitionEithers (map f xs)
+  sorted_examples:
+  - inputs:
+    - (\x -> if x == 0 then Left "Zero" else Right (x < 0))
+    - '[]'
+    output: ([], [])
+  - inputs:
+    - (\x -> if x == 0 then Left "Zero" else Right (x < 0))
+    - '[6,4,1,-2]'
+    output: ([], [False, False, False, True])
+  - inputs:
+    - (\x -> if x == 0 then Left "Zero" else Right (x < 0))
+    - '[0,-2]'
+    output: (["Zero"], [True])
+  - inputs:
+    - (\x -> if x == 0 then Left "Zero" else Right (x < 0))
+    - '[8]'
+    output: ([], [False])
+  - inputs:
+    - (\x -> if x == 0 then Left "Zero" else Right (x < 0))
+    - '[1,0,4,3]'
+    output: (["Zero"], [False, False, False])
+  - inputs:
+    - (\x -> if x == 0 then Left "Zero" else Right (x < 0))
+    - '[2,10]'
+    output: ([], [False, False])
+  - inputs:
+    - (\x -> if x == 0 then Left "Zero" else Right (x < 0))
+    - '[10,1,3]'
+    output: ([], [False, False, False])
+  - inputs:
+    - (\x -> if x == 0 then Left "Zero" else Right (x < 0))
+    - '[-1,4,0]'
+    output: (["Zero"], [True, False])
+  - inputs:
+    - (\x -> if x == 0 then Left "Zero" else Right (x < 0))
+    - '[1,0,0]'
+    output: (["Zero", "Zero"], [False])
+  - inputs:
+    - (\x -> if x == 0 then Left "Zero" else Right (x < 0))
+    - '[0]'
+    output: (["Zero"], [])
+  unsorted_examples:
+  - inputs:
+    - (\x -> if x == 0 then Left "Zero" else Right (x < 0))
+    - '[2,10]'
+    output: ([], [False, False])
+  - inputs:
+    - (\x -> if x == 0 then Left "Zero" else Right (x < 0))
+    - '[]'
+    output: ([], [])
+  - inputs:
+    - (\x -> if x == 0 then Left "Zero" else Right (x < 0))
+    - '[-1,4,0]'
+    output: (["Zero"], [True, False])
+  - inputs:
+    - (\x -> if x == 0 then Left "Zero" else Right (x < 0))
+    - '[6,4,1,-2]'
+    output: ([], [False, False, False, True])
+  - inputs:
+    - (\x -> if x == 0 then Left "Zero" else Right (x < 0))
+    - '[1,0,0]'
+    output: (["Zero", "Zero"], [False])
+  - inputs:
+    - (\x -> if x == 0 then Left "Zero" else Right (x < 0))
+    - '[1,0,4,3]'
+    output: (["Zero"], [False, False, False])
+  - inputs:
+    - (\x -> if x == 0 then Left "Zero" else Right (x < 0))
+    - '[10,1,3]'
+    output: ([], [False, False, False])
+  - inputs:
+    - (\x -> if x == 0 then Left "Zero" else Right (x < 0))
+    - '[8]'
+    output: ([], [False])
+  - inputs:
+    - (\x -> if x == 0 then Left "Zero" else Right (x < 0))
+    - '[0,-2]'
+    output: (["Zero"], [True])
+  - inputs:
+    - (\x -> if x == 0 then Left "Zero" else Right (x < 0))
+    - '[0]'
+    output: (["Zero"], [])
+  control_examples:
+  - inputs:
+    - (\x -> if x == 0 then Left "Zero" else Right (x < 0))
+    - '[2,10]'
+    output: ([], [False, False])
+  - inputs:
+    - (\x -> if x == 0 then Left "Zero" else Right (x < 0))
+    - '[]'
+    output: ([], [])
+  - inputs:
+    - (\x -> if x == 0 then Left "Zero" else Right (x < 0))
+    - '[-1,4,0]'
+    output: (["Zero"], [True, False])
+  - inputs:
+    - (\x -> if x == 0 then Left "Zero" else Right (x < 0))
+    - '[6,4,1,-2]'
+    output: ([], [False, False, False, True])
+  - inputs:
+    - (\x -> if x == 0 then Left "Zero" else Right (x < 0))
+    - '[10]'
+    output: ([], [False])
+  - inputs:
+    - (\x -> if x == 0 then Left "Zero" else Right (x < 0))
+    - '[1,0,4,3]'
+    output: (["Zero"], [False, False, False])
+  - inputs:
+    - (\x -> if x == 0 then Left "Zero" else Right (x < 0))
+    - '[0]'
+    output: (["Zero"], [])
+- name: mapEither
+  query: 'f: (a -> Either b c) -> xs: [a] -> ([b], [c])'
+  candidate: \f xs -> partitionEithers (init (map f xs))
+  sorted_examples:
+  - inputs:
+    - (\x -> if x == 0 then Left "Zero" else Right (x < 0))
+    - '[]'
+    output: 'Prelude.init: empty list'
+  - inputs:
+    - (\x -> if x == 0 then Left "Zero" else Right (x < 0))
+    - '[9,5,7,7]'
+    output: ([], [False, False, False])
+  - inputs:
+    - (\x -> if x == 0 then Left "Zero" else Right (x < 0))
+    - '[0,6]'
+    output: (["Zero"], [])
+  - inputs:
+    - (\x -> if x == 0 then Left "Zero" else Right (x < 0))
+    - '[9]'
+    output: ([], [])
+  - inputs:
+    - (\x -> if x == 0 then Left "Zero" else Right (x < 0))
+    - '[7,7,10]'
+    output: ([], [False, False])
+  - inputs:
+    - (\x -> if x == 0 then Left "Zero" else Right (x < 0))
+    - '[0,8,-2]'
+    output: (["Zero"], [False])
+  - inputs:
+    - (\x -> if x == 0 then Left "Zero" else Right (x < 0))
+    - '[2,10]'
+    output: ([], [False])
+  unsorted_examples:
+  - inputs:
+    - (\x -> if x == 0 then Left "Zero" else Right (x < 0))
+    - '[2,10]'
+    output: ([], [False])
+  - inputs:
+    - (\x -> if x == 0 then Left "Zero" else Right (x < 0))
+    - '[]'
+    output: 'Prelude.init: empty list'
+  - inputs:
+    - (\x -> if x == 0 then Left "Zero" else Right (x < 0))
+    - '[0,6]'
+    output: (["Zero"], [])
+  - inputs:
+    - (\x -> if x == 0 then Left "Zero" else Right (x < 0))
+    - '[0,8,-2]'
+    output: (["Zero"], [False])
+  - inputs:
+    - (\x -> if x == 0 then Left "Zero" else Right (x < 0))
+    - '[7,7,10]'
+    output: ([], [False, False])
+  - inputs:
+    - (\x -> if x == 0 then Left "Zero" else Right (x < 0))
+    - '[9,5,7,7]'
+    output: ([], [False, False, False])
+  - inputs:
+    - (\x -> if x == 0 then Left "Zero" else Right (x < 0))
+    - '[9]'
+    output: ([], [])
+  control_examples:
+  - inputs:
+    - (\x -> if x == 0 then Left "Zero" else Right (x < 0))
+    - '[2,10]'
+    output: ([], [False])
+  - inputs:
+    - (\x -> if x == 0 then Left "Zero" else Right (x < 0))
+    - '[]'
+    output: 'Prelude.init: empty list'
+  - inputs:
+    - (\x -> if x == 0 then Left "Zero" else Right (x < 0))
+    - '[0,6]'
+    output: (["Zero"], [])
+  - inputs:
+    - (\x -> if x == 0 then Left "Zero" else Right (x < 0))
+    - '[0,8,-2]'
+    output: (["Zero"], [False])
+  - inputs:
+    - (\x -> if x == 0 then Left "Zero" else Right (x < 0))
+    - '[7,7,10]'
+    output: ([], [False, False])
+  - inputs:
+    - (\x -> if x == 0 then Left "Zero" else Right (x < 0))
+    - '[3]'
+    output: ([], [])
+- name: mapEither
+  query: 'f: (a -> Either b c) -> xs: [a] -> ([b], [c])'
+  candidate: \f xs -> partitionEithers (reverse (map f xs))
+  sorted_examples:
+  - inputs:
+    - (\x -> if x == 0 then Left "Zero" else Right (x < 0))
+    - '[]'
+    output: ([], [])
+  - inputs:
+    - (\x -> if x == 0 then Left "Zero" else Right (x < 0))
+    - '[-1,1,5]'
+    output: ([], [False, False, True])
+  - inputs:
+    - (\x -> if x == 0 then Left "Zero" else Right (x < 0))
+    - '[10,0]'
+    output: (["Zero"], [False])
+  - inputs:
+    - (\x -> if x == 0 then Left "Zero" else Right (x < 0))
+    - '[0]'
+    output: (["Zero"], [])
+  - inputs:
+    - (\x -> if x == 0 then Left "Zero" else Right (x < 0))
+    - '[0,10,3,1]'
+    output: (["Zero"], [False, False, False])
+  - inputs:
+    - (\x -> if x == 0 then Left "Zero" else Right (x < 0))
+    - '[-1,4,0]'
+    output: (["Zero"], [False, True])
+  - inputs:
+    - (\x -> if x == 0 then Left "Zero" else Right (x < 0))
+    - '[-2,10]'
+    output: ([], [False, True])
+  - inputs:
+    - (\x -> if x == 0 then Left "Zero" else Right (x < 0))
+    - '[9]'
+    output: ([], [False])
+  unsorted_examples:
+  - inputs:
+    - (\x -> if x == 0 then Left "Zero" else Right (x < 0))
+    - '[]'
+    output: ([], [])
+  - inputs:
+    - (\x -> if x == 0 then Left "Zero" else Right (x < 0))
+    - '[-1,4,0]'
+    output: (["Zero"], [False, True])
+  - inputs:
+    - (\x -> if x == 0 then Left "Zero" else Right (x < 0))
+    - '[-2,10]'
+    output: ([], [False, True])
+  - inputs:
+    - (\x -> if x == 0 then Left "Zero" else Right (x < 0))
+    - '[0,10,3,1]'
+    output: (["Zero"], [False, False, False])
+  - inputs:
+    - (\x -> if x == 0 then Left "Zero" else Right (x < 0))
+    - '[10,0]'
+    output: (["Zero"], [False])
+  - inputs:
+    - (\x -> if x == 0 then Left "Zero" else Right (x < 0))
+    - '[0]'
+    output: (["Zero"], [])
+  - inputs:
+    - (\x -> if x == 0 then Left "Zero" else Right (x < 0))
+    - '[-1,1,5]'
+    output: ([], [False, False, True])
+  - inputs:
+    - (\x -> if x == 0 then Left "Zero" else Right (x < 0))
+    - '[9]'
+    output: ([], [False])
+  control_examples:
+  - inputs:
+    - (\x -> if x == 0 then Left "Zero" else Right (x < 0))
+    - '[]'
+    output: ([], [])
+  - inputs:
+    - (\x -> if x == 0 then Left "Zero" else Right (x < 0))
+    - '[-1,4,0]'
+    output: (["Zero"], [False, True])
+  - inputs:
+    - (\x -> if x == 0 then Left "Zero" else Right (x < 0))
+    - '[-2,10]'
+    output: ([], [False, True])
+  - inputs:
+    - (\x -> if x == 0 then Left "Zero" else Right (x < 0))
+    - '[1]'
+    output: ([], [False])
+- name: mapEither
+  query: 'f: (a -> Either b c) -> xs: [a] -> ([b], [c])'
+  candidate: \f xs -> partitionEithers (tail (map f xs))
+  sorted_examples:
+  - inputs:
+    - (\x -> if x == 0 then Left "Zero" else Right (x < 0))
+    - '[]'
+    output: 'Prelude.tail: empty list'
+  - inputs:
+    - (\x -> if x == 0 then Left "Zero" else Right (x < 0))
+    - '[0,10,7,2]'
+    output: ([], [False, False, False])
+  - inputs:
+    - (\x -> if x == 0 then Left "Zero" else Right (x < 0))
+    - '[0,6]'
+    output: ([], [False])
+  - inputs:
+    - (\x -> if x == 0 then Left "Zero" else Right (x < 0))
+    - '[0,8,-2]'
+    output: ([], [False, True])
+  - inputs:
+    - (\x -> if x == 0 then Left "Zero" else Right (x < 0))
+    - '[7]'
+    output: ([], [])
+  unsorted_examples:
+  - inputs:
+    - (\x -> if x == 0 then Left "Zero" else Right (x < 0))
+    - '[]'
+    output: 'Prelude.tail: empty list'
+  - inputs:
+    - (\x -> if x == 0 then Left "Zero" else Right (x < 0))
+    - '[0,6]'
+    output: ([], [False])
+  - inputs:
+    - (\x -> if x == 0 then Left "Zero" else Right (x < 0))
+    - '[0,8,-2]'
+    output: ([], [False, True])
+  - inputs:
+    - (\x -> if x == 0 then Left "Zero" else Right (x < 0))
+    - '[7]'
+    output: ([], [])
+  - inputs:
+    - (\x -> if x == 0 then Left "Zero" else Right (x < 0))
+    - '[0,10,7,2]'
+    output: ([], [False, False, False])
+  control_examples:
+  - inputs:
+    - (\x -> if x == 0 then Left "Zero" else Right (x < 0))
+    - '[]'
+    output: 'Prelude.tail: empty list'
+  - inputs:
+    - (\x -> if x == 0 then Left "Zero" else Right (x < 0))
+    - '[0,6]'
+    output: ([], [False])
+  - inputs:
+    - (\x -> if x == 0 then Left "Zero" else Right (x < 0))
+    - '[0,8,-2]'
+    output: ([], [False, True])
+  - inputs:
+    - (\x -> if x == 0 then Left "Zero" else Right (x < 0))
+    - '[7]'
+    output: ([], [])
+- name: mapEither
+  query: 'f: (a -> Either b c) -> xs: [a] -> ([b], [c])'
+  candidate: \f xs -> partitionEithers (map f (reverse xs))
+  sorted_examples:
+  - inputs:
+    - (\x -> if x == 0 then Left "Zero" else Right (x < 0))
+    - '[]'
+    output: ([], [])
+  - inputs:
+    - (\x -> if x == 0 then Left "Zero" else Right (x < 0))
+    - '[-2,8]'
+    output: ([], [False, True])
+  - inputs:
+    - (\x -> if x == 0 then Left "Zero" else Right (x < 0))
+    - '[6,4,1,-2]'
+    output: ([], [True, False, False, False])
+  - inputs:
+    - (\x -> if x == 0 then Left "Zero" else Right (x < 0))
+    - '[7]'
+    output: ([], [False])
+  - inputs:
+    - (\x -> if x == 0 then Left "Zero" else Right (x < 0))
+    - '[7,7,10]'
+    output: ([], [False, False, False])
+  - inputs:
+    - (\x -> if x == 0 then Left "Zero" else Right (x < 0))
+    - '[6,0]'
+    output: (["Zero"], [False])
+  - inputs:
+    - (\x -> if x == 0 then Left "Zero" else Right (x < 0))
+    - '[0]'
+    output: (["Zero"], [])
+  unsorted_examples:
+  - inputs:
+    - (\x -> if x == 0 then Left "Zero" else Right (x < 0))
+    - '[7]'
+    output: ([], [False])
+  - inputs:
+    - (\x -> if x == 0 then Left "Zero" else Right (x < 0))
+    - '[]'
+    output: ([], [])
+  - inputs:
+    - (\x -> if x == 0 then Left "Zero" else Right (x < 0))
+    - '[7,7,10]'
+    output: ([], [False, False, False])
+  - inputs:
+    - (\x -> if x == 0 then Left "Zero" else Right (x < 0))
+    - '[-2,8]'
+    output: ([], [False, True])
+  - inputs:
+    - (\x -> if x == 0 then Left "Zero" else Right (x < 0))
+    - '[6,4,1,-2]'
+    output: ([], [True, False, False, False])
+  - inputs:
+    - (\x -> if x == 0 then Left "Zero" else Right (x < 0))
+    - '[6,0]'
+    output: (["Zero"], [False])
+  - inputs:
+    - (\x -> if x == 0 then Left "Zero" else Right (x < 0))
+    - '[0]'
+    output: (["Zero"], [])
+  control_examples:
+  - inputs:
+    - (\x -> if x == 0 then Left "Zero" else Right (x < 0))
+    - '[7]'
+    output: ([], [False])
+  - inputs:
+    - (\x -> if x == 0 then Left "Zero" else Right (x < 0))
+    - '[]'
+    output: ([], [])
+  - inputs:
+    - (\x -> if x == 0 then Left "Zero" else Right (x < 0))
+    - '[7,7,10]'
+    output: ([], [False, False, False])
+  - inputs:
+    - (\x -> if x == 0 then Left "Zero" else Right (x < 0))
+    - '[-2,8]'
+    output: ([], [False, True])
+  - inputs:
+    - (\x -> if x == 0 then Left "Zero" else Right (x < 0))
+    - '[6,4,1,-2]'
+    output: ([], [True, False, False, False])
+- name: rights
+  query: 'es: [Either a b] -> Either a [b]'
+  candidate: \es -> Right (rights es)
+  sorted_examples:
+  - inputs:
+    - '[Left 10,Right "daa",Left -2]'
+    output: diverge
+  - inputs:
+    - '[Right "c",Left 6,Left 3,Right "cbaccd",Right "c"]'
+    output: Right ["c", "cbaccd", "c"]
+  - inputs:
+    - '[Right "",Right "",Left 10,Left -1]'
+    output: Right ["", ""]
+  - inputs:
+    - '[]'
+    output: Right []
+  - inputs:
+    - '[Right "bacbb",Left 2,Left 5,Left 2,Left -2,Left 7]'
+    output: Right ["bacbb"]
+  - inputs:
+    - '[Right "bc",Left 9]'
+    output: Right ["bc"]
+  - inputs:
+    - '[Right "cdacc",Right "ab",Right "db",Right "dbaa",Left 0]'
+    output: Right ["cdacc", "ab", "db", "dbaa"]
+  - inputs:
+    - '[Left 0,Left -2,Left 9,Left 1]'
+    output: Right []
+  - inputs:
+    - '[Left 5,Right "ca",Right "",Left 5,Right "ba"]'
+    output: Right ["ca", "", "ba"]
+  - inputs:
+    - '[Left -1,Left 2,Right "d",Right "adccdb"]'
+    output: Right ["d", "adccdb"]
+  - inputs:
+    - '[Left -2,Left 7,Right "dc"]'
+    output: Right ["dc"]
+  - inputs:
+    - '[Right "abdd",Left -1,Left 1,Left 10,Left 8,Right "cdab"]'
+    output: Right ["abdd", "cdab"]
+  - inputs:
+    - '[Left 2,Left 8,Right "",Left 0]'
+    output: Right [""]
+  - inputs:
+    - '[Right "d",Right ""]'
+    output: Right ["d", ""]
+  - inputs:
+    - '[Right "",Left 4,Left 1,Left 8,Right "c",Right "dacb"]'
+    output: Right ["", "c", "dacb"]
+  - inputs:
+    - '[Left 6,Left 9,Left 6]'
+    output: Right []
+  - inputs:
+    - '[Left 5]'
+    output: Right []
+  - inputs:
+    - '[Right ""]'
+    output: Right [""]
+  - inputs:
+    - '[Right "dab",Right "cddcd",Left 3,Left 8,Left 1]'
+    output: Right ["dab", "cddcd"]
+  unsorted_examples:
+  - inputs:
+    - '[Right "bc",Left 9]'
+    output: Right ["bc"]
+  - inputs:
+    - '[]'
+    output: Right []
+  - inputs:
+    - '[Left -2,Left 7,Right "dc"]'
+    output: Right ["dc"]
+  - inputs:
+    - '[Right ""]'
+    output: Right [""]
+  - inputs:
+    - '[Left -1,Left 2,Right "d",Right "adccdb"]'
+    output: Right ["d", "adccdb"]
+  - inputs:
+    - '[Right "dab",Right "cddcd",Left 3,Left 8,Left 1]'
+    output: Right ["dab", "cddcd"]
+  - inputs:
+    - '[Left 2,Left 8,Right "",Left 0]'
+    output: Right [""]
+  - inputs:
+    - '[Left 10,Right "daa",Left -2]'
+    output: diverge
+  - inputs:
+    - '[Right "",Left 4,Left 1,Left 8,Right "c",Right "dacb"]'
+    output: Right ["", "c", "dacb"]
+  - inputs:
+    - '[Left 5]'
+    output: Right []
+  - inputs:
+    - '[Right "",Right "",Left 10,Left -1]'
+    output: Right ["", ""]
+  - inputs:
+    - '[Right "cdacc",Right "ab",Right "db",Right "dbaa",Left 0]'
+    output: Right ["cdacc", "ab", "db", "dbaa"]
+  - inputs:
+    - '[Left 0,Left -2,Left 9,Left 1]'
+    output: Right []
+  - inputs:
+    - '[Right "d",Right ""]'
+    output: Right ["d", ""]
+  - inputs:
+    - '[Right "bacbb",Left 2,Left 5,Left 2,Left -2,Left 7]'
+    output: Right ["bacbb"]
+  - inputs:
+    - '[Left 5,Right "ca",Right "",Left 5,Right "ba"]'
+    output: Right ["ca", "", "ba"]
+  - inputs:
+    - '[Right "abdd",Left -1,Left 1,Left 10,Left 8,Right "cdab"]'
+    output: Right ["abdd", "cdab"]
+  - inputs:
+    - '[Left 6,Left 9,Left 6]'
+    output: Right []
+  - inputs:
+    - '[Right "c",Left 6,Left 3,Right "cbaccd",Right "c"]'
+    output: Right ["c", "cbaccd", "c"]
+  control_examples:
+  - inputs:
+    - '[Right "bc",Left 9]'
+    output: Right ["bc"]
+  - inputs:
+    - '[]'
+    output: Right []
+  - inputs:
+    - '[Left -2,Left 7,Right "dc"]'
+    output: Right ["dc"]
+  - inputs:
+    - '[Right ""]'
+    output: Right [""]
+  - inputs:
+    - '[Left -1,Left 2,Right "d",Right "adccdb"]'
+    output: Right ["d", "adccdb"]
+  - inputs:
+    - '[Right "dab",Right "cddcd",Left 3,Left 8,Left 1]'
+    output: Right ["dab", "cddcd"]
+  - inputs:
+    - '[Left 2,Left 8,Right "",Left 0]'
+    output: Right [""]
+  - inputs:
+    - '[Right "ddd",Left 5,Left 1]'
+    output: Right ["ddd"]
+  - inputs:
+    - '[Right "",Right "bd"]'
+    output: Right ["", "bd"]
+  - inputs:
+    - '[Left 0,Left 4]'
+    output: Right []
+- name: rights
+  query: 'es: [Either a b] -> Either a [b]'
+  candidate: \es -> Left (head (lefts es))
+  sorted_examples:
+  - inputs:
+    - '[]'
+    output: 'Prelude.head: empty list'
+  - inputs:
+    - '[Right "ba",Right "bacaa",Left -1,Right "abc",Left 5]'
+    output: Left -1
+  - inputs:
+    - '[Left 7,Left 6]'
+    output: Left 7
+  - inputs:
+    - '[Right "b",Right "d"]'
+    output: 'Prelude.head: empty list'
+  - inputs:
+    - '[Left -2,Left 10,Right "b",Left 8]'
+    output: Left -2
+  - inputs:
+    - '[Left -1,Right "bbdb",Left -1,Left 8]'
+    output: Left -1
+  - inputs:
+    - '[Left 4,Right "b",Left 2]'
+    output: Left 4
+  - inputs:
+    - '[Left 5,Left 4,Right "b"]'
+    output: Left 5
+  - inputs:
+    - '[Right "bdc",Right "abda",Right "dada",Left 4,Left 5]'
+    output: Left 4
+  - inputs:
+    - '[Left 7]'
+    output: Left 7
+  - inputs:
+    - '[Right "aac",Right "",Left 0,Right "ac"]'
+    output: Left 0
+  - inputs:
+    - '[Right "c"]'
+    output: 'Prelude.head: empty list'
+  - inputs:
+    - '[Right "b",Left 9,Left 4]'
+    output: Left 9
+  - inputs:
+    - '[Left -2,Right "dbc",Left 10,Left 9,Left 4]'
+    output: Left -2
+  - inputs:
+    - '[Right "dbc",Right "dbd",Right "da"]'
+    output: 'Prelude.head: empty list'
+  - inputs:
+    - '[Right "daabad",Right "adbad",Left 3,Left 2,Left 5]'
+    output: Left 3
+  - inputs:
+    - '[Left 3,Right "bba"]'
+    output: Left 3
+  - inputs:
+    - '[Right "bc",Left 9]'
+    output: Left 9
+  - inputs:
+    - '[Left 4,Right "cabcb",Right "dcdbc"]'
+    output: Left 4
+  unsorted_examples:
+  - inputs:
+    - '[Right "bc",Left 9]'
+    output: Left 9
+  - inputs:
+    - '[]'
+    output: 'Prelude.head: empty list'
+  - inputs:
+    - '[Right "b",Left 9,Left 4]'
+    output: Left 9
+  - inputs:
+    - '[Left -1,Right "bbdb",Left -1,Left 8]'
+    output: Left -1
+  - inputs:
+    - '[Left 4,Right "cabcb",Right "dcdbc"]'
+    output: Left 4
+  - inputs:
+    - '[Left 3,Right "bba"]'
+    output: Left 3
+  - inputs:
+    - '[Left 7]'
+    output: Left 7
+  - inputs:
+    - '[Left 4,Right "b",Left 2]'
+    output: Left 4
+  - inputs:
+    - '[Right "aac",Right "",Left 0,Right "ac"]'
+    output: Left 0
+  - inputs:
+    - '[Right "daabad",Right "adbad",Left 3,Left 2,Left 5]'
+    output: Left 3
+  - inputs:
+    - '[Left 5,Left 4,Right "b"]'
+    output: Left 5
+  - inputs:
+    - '[Right "b",Right "d"]'
+    output: 'Prelude.head: empty list'
+  - inputs:
+    - '[Left -2,Right "dbc",Left 10,Left 9,Left 4]'
+    output: Left -2
+  - inputs:
+    - '[Left -2,Left 10,Right "b",Left 8]'
+    output: Left -2
+  - inputs:
+    - '[Right "bdc",Right "abda",Right "dada",Left 4,Left 5]'
+    output: Left 4
+  - inputs:
+    - '[Right "ba",Right "bacaa",Left -1,Right "abc",Left 5]'
+    output: Left -1
+  - inputs:
+    - '[Left 7,Left 6]'
+    output: Left 7
+  - inputs:
+    - '[Right "c"]'
+    output: 'Prelude.head: empty list'
+  - inputs:
+    - '[Right "dbc",Right "dbd",Right "da"]'
+    output: 'Prelude.head: empty list'
+  control_examples:
+  - inputs:
+    - '[Right "bc",Left 9]'
+    output: Left 9
+  - inputs:
+    - '[]'
+    output: 'Prelude.head: empty list'
+  - inputs:
+    - '[Right "b",Left 9,Left 4]'
+    output: Left 9
+  - inputs:
+    - '[Left -1,Right "bbdb",Left -1,Left 8]'
+    output: Left -1
+  - inputs:
+    - '[Left 4,Right "cabcb",Right "dcdbc"]'
+    output: Left 4
+  - inputs:
+    - '[Left 3,Right "bba"]'
+    output: Left 3
+  - inputs:
+    - '[Left 7]'
+    output: Left 7
+  - inputs:
+    - '[Left 4,Right "b",Left 2]'
+    output: Left 4
+  - inputs:
+    - '[Right "aac",Right "",Left 0,Right "ac"]'
+    output: Left 0
+  - inputs:
+    - '[Right "daabad",Right "adbad",Left 3,Left 2,Left 5]'
+    output: Left 3
+  - inputs:
+    - '[Left 5,Left 4,Right "b"]'
+    output: Left 5
+  - inputs:
+    - '[Right "d",Right "ad"]'
+    output: 'Prelude.head: empty list'
+  - inputs:
+    - '[Right "a",Left 1,Left 2,Right "dbcbbd",Left 5]'
+    output: Left 1
+  - inputs:
+    - '[Right "bdc",Right "abda",Right "dada",Left 4,Left 5]'
+    output: Left 4
+- name: rights
+  query: 'es: [Either a b] -> Either a [b]'
+  candidate: \es -> Left (last (lefts es))
+  sorted_examples:
+  - inputs:
+    - '[]'
+    output: 'Prelude.last: empty list'
+  - inputs:
+    - '[Left 7,Left 1,Left 0,Left 7,Left 6]'
+    output: Left 6
+  - inputs:
+    - '[Left 0,Right ""]'
+    output: Left 0
+  - inputs:
+    - '[Right "adbd",Left 3,Right "acab",Right "adadac",Right "aaddb"]'
+    output: Left 3
+  - inputs:
+    - '[Right "",Right "dadb",Right ""]'
+    output: 'Prelude.last: empty list'
+  - inputs:
+    - '[Right "caba",Right "bbd",Right "a",Left 7,Left 0]'
+    output: Left 0
+  - inputs:
+    - '[Right "bcaacc",Left -1,Left 0,Right "bdda"]'
+    output: Left 0
+  - inputs:
+    - '[Left -1,Right "bbdb",Left -1,Left 8]'
+    output: Left 8
+  - inputs:
+    - '[Right "a",Right "bbd",Left -1]'
+    output: Left -1
+  - inputs:
+    - '[Left 9]'
+    output: Left 9
+  - inputs:
+    - '[Left 10,Left 6,Right "d",Left 3,Right "daaacd"]'
+    output: Left 3
+  - inputs:
+    - '[Left 9,Left 7,Left -2]'
+    output: Left -2
+  - inputs:
+    - '[Left 1,Left 8,Right "bcabd",Right "c",Left 4]'
+    output: Left 4
+  - inputs:
+    - '[Right "",Right "b"]'
+    output: 'Prelude.last: empty list'
+  - inputs:
+    - '[Right ""]'
+    output: 'Prelude.last: empty list'
+  - inputs:
+    - '[Right "",Left 7,Right "a"]'
+    output: Left 7
+  - inputs:
+    - '[Right "acb",Right "",Left 2,Left -2,Right "babcac"]'
+    output: Left -2
+  - inputs:
+    - '[Right "c",Left 5]'
+    output: Left 5
+  - inputs:
+    - '[Right "b",Left 9,Left 4]'
+    output: Left 4
+  - inputs:
+    - '[Left 7,Left 4]'
+    output: Left 4
+  - inputs:
+    - '[Left -2,Left 7,Right "dc"]'
+    output: Left 7
+  unsorted_examples:
+  - inputs:
+    - '[Right "b",Left 9,Left 4]'
+    output: Left 4
+  - inputs:
+    - '[Left -1,Right "bbdb",Left -1,Left 8]'
+    output: Left 8
+  - inputs:
+    - '[Left -2,Left 7,Right "dc"]'
+    output: Left 7
+  - inputs:
+    - '[]'
+    output: 'Prelude.last: empty list'
+  - inputs:
+    - '[Right ""]'
+    output: 'Prelude.last: empty list'
+  - inputs:
+    - '[Left 9]'
+    output: Left 9
+  - inputs:
+    - '[Right "c",Left 5]'
+    output: Left 5
+  - inputs:
+    - '[Right "caba",Right "bbd",Right "a",Left 7,Left 0]'
+    output: Left 0
+  - inputs:
+    - '[Right "",Left 7,Right "a"]'
+    output: Left 7
+  - inputs:
+    - '[Right "adbd",Left 3,Right "acab",Right "adadac",Right "aaddb"]'
+    output: Left 3
+  - inputs:
+    - '[Left 7,Left 4]'
+    output: Left 4
+  - inputs:
+    - '[Left 10,Left 6,Right "d",Left 3,Right "daaacd"]'
+    output: Left 3
+  - inputs:
+    - '[Left 0,Right ""]'
+    output: Left 0
+  - inputs:
+    - '[Right "",Right "dadb",Right ""]'
+    output: 'Prelude.last: empty list'
+  - inputs:
+    - '[Right "acb",Right "",Left 2,Left -2,Right "babcac"]'
+    output: Left -2
+  - inputs:
+    - '[Right "a",Right "bbd",Left -1]'
+    output: Left -1
+  - inputs:
+    - '[Left 1,Left 8,Right "bcabd",Right "c",Left 4]'
+    output: Left 4
+  - inputs:
+    - '[Left 9,Left 7,Left -2]'
+    output: Left -2
+  - inputs:
+    - '[Right "bcaacc",Left -1,Left 0,Right "bdda"]'
+    output: Left 0
+  - inputs:
+    - '[Left 7,Left 1,Left 0,Left 7,Left 6]'
+    output: Left 6
+  - inputs:
+    - '[Right "",Right "b"]'
+    output: 'Prelude.last: empty list'
+  control_examples:
+  - inputs:
+    - '[Right "b",Left 9,Left 4]'
+    output: Left 4
+  - inputs:
+    - '[Left -1,Right "bbdb",Left -1,Left 8]'
+    output: Left 8
+  - inputs:
+    - '[Left -2,Left 7,Right "dc"]'
+    output: Left 7
+  - inputs:
+    - '[]'
+    output: 'Prelude.last: empty list'
+  - inputs:
+    - '[Right ""]'
+    output: 'Prelude.last: empty list'
+  - inputs:
+    - '[Left 9]'
+    output: Left 9
+  - inputs:
+    - '[Right "c",Left 5]'
+    output: Left 5
+  - inputs:
+    - '[Right "caba",Right "bbd",Right "a",Left 7,Left 0]'
+    output: Left 0
+  - inputs:
+    - '[Right "",Left 7,Right "a"]'
+    output: Left 7
+  - inputs:
+    - '[Right "adbd",Left 3,Right "acab",Right "adadac",Right "aaddb"]'
+    output: Left 3
+  - inputs:
+    - '[Left 7,Left 4]'
+    output: Left 4
+- name: rights
+  query: 'es: [Either a b] -> Either a [b]'
+  candidate: \es -> Right (init (rights es))
+  sorted_examples:
+  - inputs:
+    - '[Left 9]'
+    output: 'Prelude.init: empty list'
+  - inputs:
+    - '[Right "bdb",Right "ab",Right "adabd",Right "cadbb"]'
+    output: Right ["bdb", "ab", "adabd"]
+  - inputs:
+    - '[Right "adcac",Left 2,Left 3,Left 2]'
+    output: Right []
+  - inputs:
+    - '[Left 4,Right "",Right "cca",Right "dcca",Left -2,Left 9]'
+    output: Right ["", "cca"]
+  - inputs:
+    - '[Right "ccbd",Left 9]'
+    output: Right []
+  - inputs:
+    - '[Left 6,Left -2,Right "adbbb",Right "dbb",Right "aadbc"]'
+    output: Right ["adbbb", "dbb"]
+  - inputs:
+    - '[Left 4,Right "cabcb",Right "dcdbc"]'
+    output: Right ["cabcb"]
+  - inputs:
+    - '[Right "dbdac",Right "cdaac",Left 8,Left 0,Left 0]'
+    output: Right ["dbdac"]
+  - inputs:
+    - '[Right "abcd",Left 6,Right "cb",Left -2]'
+    output: Right ["abcd"]
+  - inputs:
+    - '[Right "ddc",Right "d",Right "cb"]'
+    output: Right ["ddc", "d"]
+  - inputs:
+    - '[Left 7,Right ""]'
+    output: Right []
+  - inputs:
+    - '[Left 6,Right "",Left 4,Left -2]'
+    output: Right []
+  - inputs:
+    - '[Left -1,Left -2,Left 7,Right "",Right "a"]'
+    output: Right [""]
+  - inputs:
+    - '[]'
+    output: 'Prelude.init: empty list'
+  - inputs:
+    - '[Right "dba",Right "caa"]'
+    output: Right ["dba"]
+  - inputs:
+    - '[Left 6,Left 8]'
+    output: 'Prelude.init: empty list'
+  - inputs:
+    - '[Right ""]'
+    output: Right []
+  unsorted_examples:
+  - inputs:
+    - '[Right ""]'
+    output: Right []
+  - inputs:
+    - '[Left 9]'
+    output: 'Prelude.init: empty list'
+  - inputs:
+    - '[Right "ccbd",Left 9]'
+    output: Right []
+  - inputs:
+    - '[Left 4,Right "cabcb",Right "dcdbc"]'
+    output: Right ["cabcb"]
+  - inputs:
+    - '[]'
+    output: 'Prelude.init: empty list'
+  - inputs:
+    - '[Right "abcd",Left 6,Right "cb",Left -2]'
+    output: Right ["abcd"]
+  - inputs:
+    - '[Left 6,Left -2,Right "adbbb",Right "dbb",Right "aadbc"]'
+    output: Right ["adbbb", "dbb"]
+  - inputs:
+    - '[Right "dbdac",Right "cdaac",Left 8,Left 0,Left 0]'
+    output: Right ["dbdac"]
+  - inputs:
+    - '[Left 6,Right "",Left 4,Left -2]'
+    output: Right []
+  - inputs:
+    - '[Left 4,Right "",Right "cca",Right "dcca",Left -2,Left 9]'
+    output: Right ["", "cca"]
+  - inputs:
+    - '[Right "adcac",Left 2,Left 3,Left 2]'
+    output: Right []
+  - inputs:
+    - '[Right "bdb",Right "ab",Right "adabd",Right "cadbb"]'
+    output: Right ["bdb", "ab", "adabd"]
+  - inputs:
+    - '[Left -1,Left -2,Left 7,Right "",Right "a"]'
+    output: Right [""]
+  - inputs:
+    - '[Right "dba",Right "caa"]'
+    output: Right ["dba"]
+  - inputs:
+    - '[Left 6,Left 8]'
+    output: 'Prelude.init: empty list'
+  - inputs:
+    - '[Right "ddc",Right "d",Right "cb"]'
+    output: Right ["ddc", "d"]
+  - inputs:
+    - '[Left 7,Right ""]'
+    output: Right []
+  control_examples:
+  - inputs:
+    - '[Right ""]'
+    output: Right []
+  - inputs:
+    - '[Left 9]'
+    output: 'Prelude.init: empty list'
+  - inputs:
+    - '[Right "ccbd",Left 9]'
+    output: Right []
+  - inputs:
+    - '[Left 4,Right "cabcb",Right "dcdbc"]'
+    output: Right ["cabcb"]
+  - inputs:
+    - '[]'
+    output: 'Prelude.init: empty list'
+  - inputs:
+    - '[Right "abcd",Left 6,Right "cb",Left -2]'
+    output: Right ["abcd"]
+  - inputs:
+    - '[Left 6,Left -2,Right "adbbb",Right "dbb",Right "aadbc"]'
+    output: Right ["adbbb", "dbb"]
+  - inputs:
+    - '[Right "dbdac",Right "cdaac",Left 8,Left 0,Left 0]'
+    output: Right ["dbdac"]
+  - inputs:
+    - '[Left 6,Right "",Left 4,Left -2]'
+    output: Right []
+  - inputs:
+    - '[Left 3,Left 10]'
+    output: 'Prelude.init: empty list'
+- name: rights
+  query: 'es: [Either a b] -> Either a [b]'
+  candidate: \es -> Right (reverse (rights es))
+  sorted_examples:
+  - inputs:
+    - '[]'
+    output: Right []
+  - inputs:
+    - '[Right "",Right "",Right "d",Right "cdcb"]'
+    output: Right ["cdcb", "d", "", ""]
+  - inputs:
+    - '[Right "",Left 0,Left -1,Right "bc",Left 10]'
+    output: Right ["bc", ""]
+  - inputs:
+    - '[Right "acd",Right "a"]'
+    output: Right ["a", "acd"]
+  - inputs:
+    - '[Left 9,Left 10,Left -1,Left -2]'
+    output: Right []
+  - inputs:
+    - '[Left 7,Left 3,Right "d",Left 1,Left 5,Left -2]'
+    output: Right ["d"]
+  - inputs:
+    - '[Left 3,Left 4,Right "dacc"]'
+    output: Right ["dacc"]
+  - inputs:
+    - '[Left 6,Right "b",Right "c",Right "d",Left 6,Right "bdbc"]'
+    output: Right ["bdbc", "d", "c", "b"]
+  - inputs:
+    - '[Right "bcb"]'
+    output: Right ["bcb"]
+  - inputs:
+    - '[Left 0,Left 7]'
+    output: Right []
+  - inputs:
+    - '[Left -1,Left 2,Right "d",Right "adccdb"]'
+    output: Right ["adccdb", "d"]
+  - inputs:
+    - '[Right "dab",Right "cddcd",Left 3,Left 8,Left 1]'
+    output: Right ["cddcd", "dab"]
+  - inputs:
+    - '[Left 3,Right "bba"]'
+    output: Right ["bba"]
+  - inputs:
+    - '[Right "a",Right "dca",Left 8]'
+    output: Right ["dca", "a"]
+  - inputs:
+    - '[Right "c",Left 5]'
+    output: Right ["c"]
+  unsorted_examples:
+  - inputs:
+    - '[Right "bcb"]'
+    output: Right ["bcb"]
+  - inputs:
+    - '[]'
+    output: Right []
+  - inputs:
+    - '[Right "c",Left 5]'
+    output: Right ["c"]
+  - inputs:
+    - '[Left 3,Right "bba"]'
+    output: Right ["bba"]
+  - inputs:
+    - '[Left -1,Left 2,Right "d",Right "adccdb"]'
+    output: Right ["adccdb", "d"]
+  - inputs:
+    - '[Right "dab",Right "cddcd",Left 3,Left 8,Left 1]'
+    output: Right ["cddcd", "dab"]
+  - inputs:
+    - '[Right "a",Right "dca",Left 8]'
+    output: Right ["dca", "a"]
+  - inputs:
+    - '[Right "acd",Right "a"]'
+    output: Right ["a", "acd"]
+  - inputs:
+    - '[Left 3,Left 4,Right "dacc"]'
+    output: Right ["dacc"]
+  - inputs:
+    - '[Right "",Right "",Right "d",Right "cdcb"]'
+    output: Right ["cdcb", "d", "", ""]
+  - inputs:
+    - '[Left 9,Left 10,Left -1,Left -2]'
+    output: Right []
+  - inputs:
+    - '[Right "",Left 0,Left -1,Right "bc",Left 10]'
+    output: Right ["bc", ""]
+  - inputs:
+    - '[Left 6,Right "b",Right "c",Right "d",Left 6,Right "bdbc"]'
+    output: Right ["bdbc", "d", "c", "b"]
+  - inputs:
+    - '[Left 7,Left 3,Right "d",Left 1,Left 5,Left -2]'
+    output: Right ["d"]
+  - inputs:
+    - '[Left 0,Left 7]'
+    output: Right []
+  control_examples:
+  - inputs:
+    - '[Right "bcb"]'
+    output: Right ["bcb"]
+  - inputs:
+    - '[]'
+    output: Right []
+  - inputs:
+    - '[Right "c",Left 5]'
+    output: Right ["c"]
+  - inputs:
+    - '[Left 3,Right "bba"]'
+    output: Right ["bba"]
+  - inputs:
+    - '[Left -1,Left 2,Right "d",Right "adccdb"]'
+    output: Right ["adccdb", "d"]
+  - inputs:
+    - '[Right "dab",Right "cddcd",Left 3,Left 8,Left 1]'
+    output: Right ["cddcd", "dab"]
+  - inputs:
+    - '[Right "a",Right "dca",Left 8]'
+    output: Right ["dca", "a"]
+  - inputs:
+    - '[Right "acd",Right "a"]'
+    output: Right ["a", "acd"]
+  - inputs:
+    - '[Left 3,Left 4,Right "dacc"]'
+    output: Right ["dacc"]
+  - inputs:
+    - '[Left 9]'
+    output: Right []
+- name: rights
+  query: 'es: [Either a b] -> Either a [b]'
+  candidate: \es -> Right (tail (rights es))
+  sorted_examples:
+  - inputs:
+    - '[]'
+    output: 'Prelude.tail: empty list'
+  - inputs:
+    - '[Left 6,Left -2,Right "adbbb",Right "dbb",Right "aadbc"]'
+    output: Right ["dbb", "aadbc"]
+  - inputs:
+    - '[Left 7,Right "da"]'
+    output: Right []
+  - inputs:
+    - '[Right "cda",Left 1,Left -2,Right "abac"]'
+    output: Right ["abac"]
+  - inputs:
+    - '[Left 2,Left -2,Right "cc",Left 9,Left 1]'
+    output: Right []
+  - inputs:
+    - '[Right "a",Right "dca",Left 8]'
+    output: Right ["dca"]
+  - inputs:
+    - '[Left -1,Right "cbaa",Right "",Left 4,Right ""]'
+    output: Right ["", ""]
+  - inputs:
+    - '[Left 3,Left 6]'
+    output: 'Prelude.tail: empty list'
+  - inputs:
+    - '[Right "",Left 6,Left 0]'
+    output: Right []
+  - inputs:
+    - '[Left 10,Right "",Left 9,Left -1,Right "",Right "ccbbbb"]'
+    output: Right ["", "ccbbbb"]
+  - inputs:
+    - '[Right "caba",Right "bbd",Right "a",Left 7,Left 0]'
+    output: Right ["bbd", "a"]
+  - inputs:
+    - '[Left -2,Right "acadd",Right "cbcd"]'
+    output: Right ["cbcd"]
+  - inputs:
+    - '[Right "cab"]'
+    output: Right []
+  - inputs:
+    - '[Right "ba",Right "d"]'
+    output: Right ["d"]
+  - inputs:
+    - '[Left 7]'
+    output: 'Prelude.tail: empty list'
+  - inputs:
+    - '[Right "b",Left 9]'
+    output: Right []
+  - inputs:
+    - '[Left 3,Right "ddac",Left 4]'
+    output: Right []
+  - inputs:
+    - '[Right "adc",Left -2,Right "b"]'
+    output: Right ["b"]
+  - inputs:
+    - '[Right "abcd",Left 6,Right "cb",Left -2]'
+    output: Right ["cb"]
+  unsorted_examples:
+  - inputs:
+    - '[Right "a",Right "dca",Left 8]'
+    output: Right ["dca"]
+  - inputs:
+    - '[]'
+    output: 'Prelude.tail: empty list'
+  - inputs:
+    - '[Right "abcd",Left 6,Right "cb",Left -2]'
+    output: Right ["cb"]
+  - inputs:
+    - '[Left 6,Left -2,Right "adbbb",Right "dbb",Right "aadbc"]'
+    output: Right ["dbb", "aadbc"]
+  - inputs:
+    - '[Right "cab"]'
+    output: Right []
+  - inputs:
+    - '[Right "caba",Right "bbd",Right "a",Left 7,Left 0]'
+    output: Right ["bbd", "a"]
+  - inputs:
+    - '[Left 7]'
+    output: 'Prelude.tail: empty list'
+  - inputs:
+    - '[Right "",Left 6,Left 0]'
+    output: Right []
+  - inputs:
+    - '[Right "adc",Left -2,Right "b"]'
+    output: Right ["b"]
+  - inputs:
+    - '[Left 10,Right "",Left 9,Left -1,Right "",Right "ccbbbb"]'
+    output: Right ["", "ccbbbb"]
+  - inputs:
+    - '[Left -1,Right "cbaa",Right "",Left 4,Right ""]'
+    output: Right ["", ""]
+  - inputs:
+    - '[Left 3,Left 6]'
+    output: 'Prelude.tail: empty list'
+  - inputs:
+    - '[Left 2,Left -2,Right "cc",Left 9,Left 1]'
+    output: Right []
+  - inputs:
+    - '[Right "ba",Right "d"]'
+    output: Right ["d"]
+  - inputs:
+    - '[Right "cda",Left 1,Left -2,Right "abac"]'
+    output: Right ["abac"]
+  - inputs:
+    - '[Left 3,Right "ddac",Left 4]'
+    output: Right []
+  - inputs:
+    - '[Left -2,Right "acadd",Right "cbcd"]'
+    output: Right ["cbcd"]
+  - inputs:
+    - '[Left 7,Right "da"]'
+    output: Right []
+  - inputs:
+    - '[Right "b",Left 9]'
+    output: Right []
+  control_examples:
+  - inputs:
+    - '[Right "a",Right "dca",Left 8]'
+    output: Right ["dca"]
+  - inputs:
+    - '[]'
+    output: 'Prelude.tail: empty list'
+  - inputs:
+    - '[Right "abcd",Left 6,Right "cb",Left -2]'
+    output: Right ["cb"]
+  - inputs:
+    - '[Left 6,Left -2,Right "adbbb",Right "dbb",Right "aadbc"]'
+    output: Right ["dbb", "aadbc"]
+  - inputs:
+    - '[Right "cab"]'
+    output: Right []
+  - inputs:
+    - '[Right "caba",Right "bbd",Right "a",Left 7,Left 0]'
+    output: Right ["bbd", "a"]
+  - inputs:
+    - '[Left 7]'
+    output: 'Prelude.tail: empty list'
+  - inputs:
+    - '[Right "",Left 6,Left 0]'
+    output: Right []
+  - inputs:
+    - '[Right "adc",Left -2,Right "b"]'
+    output: Right ["b"]
+  - inputs:
+    - '[Left 10,Right "",Left 9,Left -1,Right "",Right "ccbbbb"]'
+    output: Right ["", "ccbbbb"]
+  - inputs:
+    - '[Left -1,Right "cbaa",Right "",Left 4,Right ""]'
+    output: Right ["", ""]
+  - inputs:
+    - '[Left 3,Left 6]'
+    output: 'Prelude.tail: empty list'
+  - inputs:
+    - '[Left 3,Right "ddac",Left 4]'
+    output: Right []
+  - inputs:
+    - '[Left -2,Right "acadd",Right "cbcd"]'
+    output: Right ["cbcd"]
+- name: rights
+  query: 'es: [Either a b] -> Either a [b]'
+  candidate: \es -> Right (rights (init es))
+  sorted_examples:
+  - inputs:
+    - '[]'
+    output: 'Prelude.init: empty list'
+  - inputs:
+    - '[Right "cbcc",Right "",Left 7,Left 5,Left 4]'
+    output: Right ["cbcc", ""]
+  - inputs:
+    - '[Right "acd",Right "a"]'
+    output: Right ["acd"]
+  - inputs:
+    - '[Left 4,Left 3,Left 5]'
+    output: Right []
+  - inputs:
+    - '[Left 6,Left -1,Right "aadd",Left 0,Right "ac"]'
+    output: Right ["aadd"]
+  - inputs:
+    - '[Right "cdbbc",Left -1,Right "ccd",Left 8]'
+    output: Right ["cdbbc", "ccd"]
+  - inputs:
+    - '[Left 4]'
+    output: Right []
+  - inputs:
+    - '[Right "aac",Right "",Left 0,Right "ac"]'
+    output: Right ["aac", ""]
+  - inputs:
+    - '[Left 4,Right "b",Left 2]'
+    output: Right ["b"]
+  - inputs:
+    - '[Right "adc",Left -2,Right "b"]'
+    output: Right ["adc"]
+  - inputs:
+    - '[Right "bac",Right "a",Left -2,Right "cad",Left 0]'
+    output: Right ["bac", "a", "cad"]
+  - inputs:
+    - '[Left -2,Left 9,Right "dbbcc",Right "abbadc"]'
+    output: Right ["dbbcc"]
+  - inputs:
+    - '[Right "bddc",Right "da",Right ""]'
+    output: Right ["bddc", "da"]
+  - inputs:
+    - '[Left 4,Right "dcbca",Right "cadbb",Left 7,Right "abcbd"]'
+    output: Right ["dcbca", "cadbb"]
+  - inputs:
+    - '[Left 7,Left 5]'
+    output: Right []
+  - inputs:
+    - '[Right "cbd",Left 6]'
+    output: Right ["cbd"]
+  - inputs:
+    - '[Left 8,Right "cd",Right "a"]'
+    output: Right ["cd"]
+  unsorted_examples:
+  - inputs:
+    - '[Left 4]'
+    output: Right []
+  - inputs:
+    - '[Right "adc",Left -2,Right "b"]'
+    output: Right ["adc"]
+  - inputs:
+    - '[Right "acd",Right "a"]'
+    output: Right ["acd"]
+  - inputs:
+    - '[]'
+    output: 'Prelude.init: empty list'
+  - inputs:
+    - '[Left 4,Right "b",Left 2]'
+    output: Right ["b"]
+  - inputs:
+    - '[Right "aac",Right "",Left 0,Right "ac"]'
+    output: Right ["aac", ""]
+  - inputs:
+    - '[Left 4,Right "dcbca",Right "cadbb",Left 7,Right "abcbd"]'
+    output: Right ["dcbca", "cadbb"]
+  - inputs:
+    - '[Right "cbcc",Right "",Left 7,Left 5,Left 4]'
+    output: Right ["cbcc", ""]
+  - inputs:
+    - '[Left 8,Right "cd",Right "a"]'
+    output: Right ["cd"]
+  - inputs:
+    - '[Left -2,Left 9,Right "dbbcc",Right "abbadc"]'
+    output: Right ["dbbcc"]
+  - inputs:
+    - '[Right "cbd",Left 6]'
+    output: Right ["cbd"]
+  - inputs:
+    - '[Left 4,Left 3,Left 5]'
+    output: Right []
+  - inputs:
+    - '[Right "bac",Right "a",Left -2,Right "cad",Left 0]'
+    output: Right ["bac", "a", "cad"]
+  - inputs:
+    - '[Right "cdbbc",Left -1,Right "ccd",Left 8]'
+    output: Right ["cdbbc", "ccd"]
+  - inputs:
+    - '[Left 6,Left -1,Right "aadd",Left 0,Right "ac"]'
+    output: Right ["aadd"]
+  - inputs:
+    - '[Right "bddc",Right "da",Right ""]'
+    output: Right ["bddc", "da"]
+  - inputs:
+    - '[Left 7,Left 5]'
+    output: Right []
+  control_examples:
+  - inputs:
+    - '[Left 4]'
+    output: Right []
+  - inputs:
+    - '[Right "adc",Left -2,Right "b"]'
+    output: Right ["adc"]
+  - inputs:
+    - '[Right "acd",Right "a"]'
+    output: Right ["acd"]
+  - inputs:
+    - '[]'
+    output: 'Prelude.init: empty list'
+  - inputs:
+    - '[Left 4,Right "b",Left 2]'
+    output: Right ["b"]
+  - inputs:
+    - '[Right "aac",Right "",Left 0,Right "ac"]'
+    output: Right ["aac", ""]
+  - inputs:
+    - '[Left 4,Right "dcbca",Right "cadbb",Left 7,Right "abcbd"]'
+    output: Right ["dcbca", "cadbb"]
+  - inputs:
+    - '[Right "cbcc",Right "",Left 7,Left 5,Left 4]'
+    output: Right ["cbcc", ""]
+  - inputs:
+    - '[Left 8,Right "cd",Right "a"]'
+    output: Right ["cd"]
+  - inputs:
+    - '[Right ""]'
+    output: Right []
+- name: rights
+  query: 'es: [Either a b] -> Either a [b]'
+  candidate: \es -> Right (rights (tail es))
+  sorted_examples:
+  - inputs:
+    - '[]'
+    output: 'Prelude.tail: empty list'
+  - inputs:
+    - '[Left 4,Right "dcbca",Right "cadbb",Left 7,Right "abcbd"]'
+    output: Right ["dcbca", "cadbb", "abcbd"]
+  - inputs:
+    - '[Right "",Right ""]'
+    output: Right [""]
+  - inputs:
+    - '[Left 3,Left 3,Left 0,Left 0]'
+    output: Right []
+  - inputs:
+    - '[Right "dbc",Right "d",Right "ca",Left 4,Left 10,Left 5]'
+    output: Right ["d", "ca"]
+  - inputs:
+    - '[Left 7,Left 4]'
+    output: Right []
+  - inputs:
+    - '[Right "ac",Left 5,Right "cd",Left 3]'
+    output: Right ["cd"]
+  - inputs:
+    - '[Right "adbd",Left 3,Right "acab",Right "adadac",Right "aaddb"]'
+    output: Right ["acab", "adadac", "aaddb"]
+  - inputs:
+    - '[Left 9,Left 0,Right "ba"]'
+    output: Right ["ba"]
+  - inputs:
+    - '[Right "ca",Left 6,Right "b",Left 7,Left 10,Left -1]'
+    output: Right ["b"]
+  - inputs:
+    - '[Right "cbc"]'
+    output: Right []
+  - inputs:
+    - '[Left 10,Right "",Left 9,Left -1,Right "",Right "ccbbbb"]'
+    output: Right ["", "", "ccbbbb"]
+  - inputs:
+    - '[Left 6,Right "",Left 4,Left -2]'
+    output: Right [""]
+  - inputs:
+    - '[Left -2,Right "ca",Right ""]'
+    output: Right ["ca", ""]
+  - inputs:
+    - '[Left 9,Left 5,Right "",Left 6,Right ""]'
+    output: Right ["", ""]
+  - inputs:
+    - '[Right "cbcc",Right "",Left 7,Left 5,Left 4]'
+    output: Right [""]
+  - inputs:
+    - '[Left 5,Right "dda",Left -2]'
+    output: Right ["dda"]
+  - inputs:
+    - '[Right "ada",Right "",Left 2]'
+    output: Right [""]
+  - inputs:
+    - '[Left 10,Right ""]'
+    output: Right [""]
+  unsorted_examples:
+  - inputs:
+    - '[Left 4,Right "dcbca",Right "cadbb",Left 7,Right "abcbd"]'
+    output: Right ["dcbca", "cadbb", "abcbd"]
+  - inputs:
+    - '[Right "cbcc",Right "",Left 7,Left 5,Left 4]'
+    output: Right [""]
+  - inputs:
+    - '[Left 10,Right "",Left 9,Left -1,Right "",Right "ccbbbb"]'
+    output: Right ["", "", "ccbbbb"]
+  - inputs:
+    - '[Right "ada",Right "",Left 2]'
+    output: Right [""]
+  - inputs:
+    - '[]'
+    output: 'Prelude.tail: empty list'
+  - inputs:
+    - '[Left 6,Right "",Left 4,Left -2]'
+    output: Right [""]
+  - inputs:
+    - '[Right "adbd",Left 3,Right "acab",Right "adadac",Right "aaddb"]'
+    output: Right ["acab", "adadac", "aaddb"]
+  - inputs:
+    - '[Left 9,Left 0,Right "ba"]'
+    output: Right ["ba"]
+  - inputs:
+    - '[Left 5,Right "dda",Left -2]'
+    output: Right ["dda"]
+  - inputs:
+    - '[Left 10,Right ""]'
+    output: Right [""]
+  - inputs:
+    - '[Right "ca",Left 6,Right "b",Left 7,Left 10,Left -1]'
+    output: Right ["b"]
+  - inputs:
+    - '[Left -2,Right "ca",Right ""]'
+    output: Right ["ca", ""]
+  - inputs:
+    - '[Left 7,Left 4]'
+    output: Right []
+  - inputs:
+    - '[Left 9,Left 5,Right "",Left 6,Right ""]'
+    output: Right ["", ""]
+  - inputs:
+    - '[Left 3,Left 3,Left 0,Left 0]'
+    output: Right []
+  - inputs:
+    - '[Right "ac",Left 5,Right "cd",Left 3]'
+    output: Right ["cd"]
+  - inputs:
+    - '[Right "cbc"]'
+    output: Right []
+  - inputs:
+    - '[Right "dbc",Right "d",Right "ca",Left 4,Left 10,Left 5]'
+    output: Right ["d", "ca"]
+  - inputs:
+    - '[Right "",Right ""]'
+    output: Right [""]
+  control_examples:
+  - inputs:
+    - '[Left 4,Right "dcbca",Right "cadbb",Left 7,Right "abcbd"]'
+    output: Right ["dcbca", "cadbb", "abcbd"]
+  - inputs:
+    - '[Right "cbcc",Right "",Left 7,Left 5,Left 4]'
+    output: Right [""]
+  - inputs:
+    - '[Left 10,Right "",Left 9,Left -1,Right "",Right "ccbbbb"]'
+    output: Right ["", "", "ccbbbb"]
+  - inputs:
+    - '[Right "ada",Right "",Left 2]'
+    output: Right [""]
+  - inputs:
+    - '[]'
+    output: 'Prelude.tail: empty list'
+  - inputs:
+    - '[Left 6,Right "",Left 4,Left -2]'
+    output: Right [""]
+  - inputs:
+    - '[Right "adbd",Left 3,Right "acab",Right "adadac",Right "aaddb"]'
+    output: Right ["acab", "adadac", "aaddb"]
+  - inputs:
+    - '[Left 9,Left 0,Right "ba"]'
+    output: Right ["ba"]
+  - inputs:
+    - '[Left 5,Right "dda",Left -2]'
+    output: Right ["dda"]
+  - inputs:
+    - '[Left 10,Right ""]'
+    output: Right [""]
+  - inputs:
+    - '[Left 2]'
+    output: Right []
+  - inputs:
+    - '[Right "c"]'
+    output: Right []
+- name: rights
+  query: 'es: [Either a b] -> Either a [b]'
+  candidate: \es -> Right (drop (length es) [])
+  sorted_examples:
+  - inputs:
+    - '[Left 10,Right ""]'
+    output: Right []
+  - inputs:
+    - '[Right "ba",Right "b",Left -1,Left -2,Left 7,Right "ad"]'
+    output: Right []
+  - inputs:
+    - '[Left 1,Left 4,Left 0,Left -1,Right "c",Left 6]'
+    output: Right []
+  - inputs:
+    - '[Right "cddaa",Right "db",Right "bdbbca",Right "ac",Left 8]'
+    output: Right []
+  - inputs:
+    - '[]'
+    output: Right []
+  - inputs:
+    - '[Left 2,Left 8,Right "",Left 0]'
+    output: Right []
+  - inputs:
+    - '[Left 8,Left 8,Left 4,Right "dd",Right "aaadd"]'
+    output: Right []
+  - inputs:
+    - '[Right "cadd",Right "abd",Right "ad"]'
+    output: Right []
+  - inputs:
+    - '[Left 3,Right "",Left 3,Left -1,Left 3]'
+    output: Right []
+  - inputs:
+    - '[Right "aa",Left 5]'
+    output: Right []
+  - inputs:
+    - '[Left 3,Left 4,Right "dacc"]'
+    output: Right []
+  - inputs:
+    - '[Left 10]'
+    output: Right []
+  - inputs:
+    - '[Left 2,Left 6,Left -2]'
+    output: Right []
+  - inputs:
+    - '[Left 8,Right "cd",Right "a"]'
+    output: Right []
+  - inputs:
+    - '[Right "b",Left 6,Right "bcdb",Left 9]'
+    output: Right []
+  - inputs:
+    - '[Left 2,Right "cbd",Right "adb",Left 5]'
+    output: Right []
+  - inputs:
+    - '[Left 3,Left 6]'
+    output: Right []
+  unsorted_examples:
+  - inputs:
+    - '[Left 10,Right ""]'
+    output: Right []
+  - inputs:
+    - '[]'
+    output: Right []
+  - inputs:
+    - '[Left 8,Right "cd",Right "a"]'
+    output: Right []
+  - inputs:
+    - '[Left 3,Left 6]'
+    output: Right []
+  - inputs:
+    - '[Left 3,Left 4,Right "dacc"]'
+    output: Right []
+  - inputs:
+    - '[Right "aa",Left 5]'
+    output: Right []
+  - inputs:
+    - '[Left 2,Left 8,Right "",Left 0]'
+    output: Right []
+  - inputs:
+    - '[Left 10]'
+    output: Right []
+  - inputs:
+    - '[Left 8,Left 8,Left 4,Right "dd",Right "aaadd"]'
+    output: Right []
+  - inputs:
+    - '[Right "cadd",Right "abd",Right "ad"]'
+    output: Right []
+  - inputs:
+    - '[Right "cddaa",Right "db",Right "bdbbca",Right "ac",Left 8]'
+    output: Right []
+  - inputs:
+    - '[Right "b",Left 6,Right "bcdb",Left 9]'
+    output: Right []
+  - inputs:
+    - '[Left 2,Left 6,Left -2]'
+    output: Right []
+  - inputs:
+    - '[Right "ba",Right "b",Left -1,Left -2,Left 7,Right "ad"]'
+    output: Right []
+  - inputs:
+    - '[Left 3,Right "",Left 3,Left -1,Left 3]'
+    output: Right []
+  - inputs:
+    - '[Left 2,Right "cbd",Right "adb",Left 5]'
+    output: Right []
+  - inputs:
+    - '[Left 1,Left 4,Left 0,Left -1,Right "c",Left 6]'
+    output: Right []
+  control_examples:
+  - inputs:
+    - '[Left 10,Right ""]'
+    output: Right []
+  - inputs:
+    - '[]'
+    output: Right []
+  - inputs:
+    - '[Left 8,Right "cd",Right "a"]'
+    output: Right []
+  - inputs:
+    - '[Left 3,Left 6]'
+    output: Right []
+  - inputs:
+    - '[Left 3,Left 4,Right "dacc"]'
+    output: Right []
+  - inputs:
+    - '[Right "aa",Left 5]'
+    output: Right []
+  - inputs:
+    - '[Left 2,Left 8,Right "",Left 0]'
+    output: Right []
+  - inputs:
+    - '[Right "",Right "cd"]'
+    output: Right []
+  - inputs:
+    - '[Right "c"]'
+    output: Right []

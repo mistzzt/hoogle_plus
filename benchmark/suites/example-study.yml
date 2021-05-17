@@ -8,42 +8,6 @@
     - inputs: ["3", "[]"]
       output: "3"
 
-- name: applyNtimes
-  query: "f: (a -> a) -> x: a -> n: Int -> a"
-  solution: "\\f x n -> Data.List.foldr ($) x (Data.List.replicate n f)"
-  source: "hoogle"
-  example:
-    - inputs: ["\\x -> x ++ x", "\"f-\"", "3"]
-      output: "\"f-f-f-f-f-f-f-f-\""
-
-- name: pipe
-  query: "fs: [(a -> a)] -> x: a -> a"
-  solution: "\\xs x -> Data.List.foldr ($) x xs"
-  source: "hoogle"
-  example:
-    - inputs: ["[\\x -> x + 1, \\x -> x * 2, \\x -> x * x]", "3"]
-      output: "19"
-
-- name: mbElem
-  query: "Eq a => x: a -> xs: [a] -> Maybe a"
-  solution: "\\x xs -> bool Nothing (Just x) (GHC.List.elem x xs)"
-  source: "hoogle"
-  example:
-    - inputs: ["2", "[1,3,5,7,9]"]
-      output: "Nothing"
-    - inputs: ["3", "[1,3,5,7,9]"]
-      output: "Just 3"
-
-- name: areEq
-  query: "Eq a => x: a -> y: a -> Maybe a"
-  solution: "\\x y -> bool Nothing (Just x) ((==) x y)"
-  source: "hoogle"
-  example:
-    - inputs: ["1", "2"]
-      output: "Nothing"
-    - inputs: ["1", "1"]
-      output: "Just 1"
-
 - name: dedupe
   query: "Eq a => xs: [a] -> [a]"
   solution: "\\xs -> Data.List.map Data.List.head (Data.List.group xs)"
@@ -51,14 +15,6 @@
   example:
     - inputs: ["\"aaabbbccc\""]
       output: "\"abc\""
-
-- name: inverseMap
-  query: "fs: [a -> b] -> x: a -> [b]"
-  solution: "\\fs x -> Data.List.map ($ x) fs"
-  source: "original"
-  example:
-    - inputs: ["[\\x -> x + 3, \\x -> x * x]", "4"]
-      output: "[7, 16]"
 
 - name: mbToEither
   query: "x: a -> mb: Maybe b -> Either a b"
@@ -69,14 +25,6 @@
       output: Left 1
     - inputs: ["3", Just 2]
       output: Right 2
-
-- name: concatNTimes
-  query: "n: Int -> xs: [a] -> [a]"
-  solution: "\\n xs -> Data.List.concat (Data.List.replicate n xs)"
-  source: "hoogle"
-  example:
-    - inputs: ["2", "[1,2,3]"]
-      output: "[1,2,3,1,2,3]"
 
 - name: mapEither
   query: "f: (a -> Either b c) -> xs: [a] -> ([b], [c])"

@@ -5,9 +5,14 @@ import time
 import logging
 from flask_cors import CORS, cross_origin
 from expiringdict import ExpiringDict
+import yaml
 from hplus.util import *
 
 cache = ExpiringDict(max_len=100, max_age_seconds=(2 * TIMEOUT))
+with open("./dataset.yml", 'r') as stream:
+    data = yaml.safe_load(stream)
+
+EXAMPLE_USED = 'unsorted_examples'
 
 def create_app(test_config=None):
     # create and configure the app
@@ -39,40 +44,63 @@ def create_app(test_config=None):
     @app.route('/search/type', methods=['GET', 'POST'])
     def search_type():
         obj = json.loads(request.data)
-        query = {
-                 'query': obj['typeSignature'],
-                 'inExamples': obj['facts']
-                }
         qid = uuid.uuid1()
-        proc = run_hplus([f'--json={json.dumps(query)}',
-                          f'--search-type={QueryType.search_programs.value}',
-                          '--cnt=10'])
-        cache[str(qid)] = proc.pid
-        print(f"id: {str(qid)} => proc: {proc.pid}")
-        print(cache)
-        def generate():
-            return get_results(proc, QueryType.search_programs, qid)
-        return Response(generate(), mimetype='application/json')
 
-    @app.route('/search/example', methods=['GET', 'POST'])
-    def search_example():
-        obj = json.loads(request.data)
-        # print(obj)
-        query = {
-                 'query': '??',
-                 'inExamples': obj['facts']
-                }
-        proc = run_hplus([f'--json={json.dumps(query)}',
-                          f'--search-type={QueryType.search_types.value}'])
-        return json.jsonify(build_object(QueryType.search_types,
-                                         communicate_result(proc)))
+        all_candidates = filter(lambda x: x['query'] == obj['typeSignature'], data)
+        entry_to_json = lambda x: json.dumps({'id': qid, 'candidates': [{'code': x['candidate'], 'examples': x[EXAMPLE_USED]}], 'error': '', 'docs': []}) + '\n'
+
+        cache[str(qid)] = 0
+        return Response(map(entry_to_json, all_candidates), mimetype='application/json')
+
+    # @app.route('/search/example', methods=['GET', 'POST'])
+    # def search_example():
+    #     obj = json.loads(request.data)
+    #     # print(obj)
+    #     query = {
+    #              'query': '??',
+    #              'inExamples': obj['facts']
+    #             }
+    #     proc = run_hplus([f'--json={json.dumps(query)}',
+    #                       f'--search-type={QueryType.search_types.value}'])
+    #     return json.jsonify(build_object(QueryType.search_types,
+    #                                      communicate_result(proc)))
 
     @app.route('/stop', methods=['GET', 'POST'])
     def stop():
-        qid = request.get_json()['id']
-        pid = cache.get(qid)
-        os.killpg(os.getpgid(pid), signal.SIGKILL)
+        # qid = request.get_json()['id']
+        # pid = cache.get(qid)
+        # os.killpg(os.getpgid(pid), signal.SIGKILL)
         return ('', 204)
+
+    # @app.route('/examples', methods=['GET', 'POST'])
+    # def get_examples():
+    #     obj = json.loads(request.data)
+    #     # print(obj)
+    #     query = {
+    #              'exampleQuery': obj['typeSignature'],
+    #              'exampleProgram': obj['candidate'],
+    #              'exampleExisting': obj['examples']
+    #             }
+    #     return json.jsonify({
+    #         'examples': [],
+    #         'error': 'No more examples'
+    #     })
+
+    # @app.route('/example/code', methods=['GET', 'POST'])
+    # def result_for():
+    #     obj = json.loads(request.data)
+    #     # print(obj)
+    #     query = {
+    #              'execQuery': obj['typeSignature'],
+    #              'execProg': obj['candidate'],
+    #              'execArgs': obj['args']
+    #             }
+
+        
+    #     return json.jsonify({
+    #         'result': 'N/A',
+    #         'error': 'N/A'
+    #     })
 
     @app.route('/examples', methods=['GET', 'POST'])
     def get_examples():

@@ -6,7 +6,7 @@ QUERY_FILE = "../suites/example-study.yml"
 EXPERIMENT = [
     # OptionExperiment("notimeout-filter",   ["--disable-filter=False",  "--cnt=9999"], 180),
     # OptionExperiment("timeout-nofilter",   ["--disable-filter=True",   "--cnt=9999"], 60),
-    OptionExperiment("control-random",     ["--disable-filter=False",  "--cnt=9999"], 120),
+    OptionExperiment("universal-480",     ["--disable-filter=False",  "--cnt=9999"], 300),
 ]
 
 def main():

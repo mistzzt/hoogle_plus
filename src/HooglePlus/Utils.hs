@@ -172,9 +172,9 @@ printFilter solution fs@FilterState{discardedSolutions, solutionDescriptions, di
         diffExamples = unlines $ concatMap (\(soln, examples) -> ("- " ++ soln) : map (('\t':) . show) examples) (Map.toList differentiateExamples)
         (ioExamples, relatedExamples)   = let (_, desc) = head $ filter ((== solution) . fst) solutionDescriptions in case desc of Total ex s _ -> (map show ex, map (map show) s); Partial ex s _ -> (map show ex, map (map show) s); _ -> ([], [])
 
-        experimentDataSorted = map (second (map (first show))) . sortExperimentData <$> buildExperimentData extractDescriptionPlain fs
-        experimentDataShuffled = map (second (map (first show))) <$> buildExperimentData extractDescriptionPlain fs
-        experimentDataRandomExamples = map (second (map (first show))) <$> buildExperimentData extractDescriptionRandom fs
+        experimentDataSorted = map (second (map (first toExample))) . sortExperimentData <$> buildExperimentData extractDescriptionPlain fs
+        experimentDataShuffled = map (second (map (first toExample))) <$> buildExperimentData extractDescriptionPlain fs
+        experimentDataRandomExamples = map (second (map (first toExample))) <$> buildExperimentData extractDescriptionRandom fs
 
         encodeWithPrefix obj = LB.append (LB.pack "EXPRMTS:") (A.encode obj)
 
