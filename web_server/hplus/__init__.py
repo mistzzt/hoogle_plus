@@ -43,22 +43,16 @@ def create_app(test_config=None):
 
     @app.route('/search/type', methods=['GET', 'POST'])
     def search_type():
-        def remove_following_space(s):
-            is_colon = False
-            result = []
-            for c in s:
-                if c == ' ' and is_colon: continue
-
-                result.append(c)
-                is_colon = c == ':'
-                
-            return ''.join(result)
+        def remove_param_name(s):
+            params = map(lambda x: x.split(":"), s.split("->"))
+            
+            typesOnly = list(map(str.strip, map(lambda xs: xs[1] if len(xs) > 1 else xs[0], params)))
+            return " -> ".join(typesOnly)
 
         obj = json.loads(request.data)
         qid = uuid.uuid1()
-        print(remove_following_space('x: a -> xs: [Maybe a] -> a'))
 
-        all_candidates = filter(lambda x: remove_following_space(x['query']) == obj['typeSignature'], data)
+        all_candidates = filter(lambda x: remove_param_name(x['query']) == remove_param_name(obj['typeSignature']), data)
         entry_to_json = lambda x: json.dumps({'id': qid, 'candidates': [{'code': x['candidate'], 'examples': x[EXAMPLE_USED]}], 'error': '', 'docs': []}) + '\n'
 
         cache[str(qid)] = 0
