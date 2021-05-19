@@ -111,11 +111,11 @@ def create_app(test_config=None):
     def get_examples():
         obj = json.loads(request.data)
         # print(obj)
-        query = {
-                 'exampleQuery': obj['typeSignature'],
-                 'exampleProgram': obj['candidate'],
-                 'exampleExisting': obj['examples']
-                }
+        # query = {
+        #          'exampleQuery': obj['typeSignature'],
+        #          'exampleProgram': obj['candidate'],
+        #          'exampleExisting': obj['examples']
+        #         }
         return json.jsonify({
             'examples': [],
             'error': 'No more examples'
@@ -125,11 +125,11 @@ def create_app(test_config=None):
     def result_for():
         obj = json.loads(request.data)
         # print(obj)
-        query = {
-                 'execQuery': obj['typeSignature'],
-                 'execProg': obj['candidate'],
-                 'execArgs': obj['args']
-                }
+        # query = {
+        #          'execQuery': obj['typeSignature'],
+        #          'execProg': obj['candidate'],
+        #          'execArgs': obj['args']
+        #         }
 
         
         return json.jsonify({
