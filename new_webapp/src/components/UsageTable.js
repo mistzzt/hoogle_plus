@@ -126,7 +126,7 @@ const UsageTableBase = ({
           />
           <TableEditRow/>
           <TableEditColumn
-            showAddCommand
+            showAddCommand={resultsFeatures.permitEditExamples}
             showDeleteCommand={resultsFeatures.permitKeepUsage}
             showEditCommand={resultsFeatures.permitEditExamples}
             messages={{

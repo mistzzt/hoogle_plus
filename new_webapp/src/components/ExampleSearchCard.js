@@ -30,10 +30,10 @@ const ConnectedExampleSearchCard = (props) => {
     const searchByTypeOnly = (
         <ExampleSearchItem
             name = "firstJust"
-            description = "d:a -> xs:[Maybe a] -> a"
-            queryStr = "d:a -> xs:[Maybe a] -> a"
+            description = "x:a -> xs:[Maybe a] -> a"
+            queryStr = "x:a -> xs:[Maybe a] -> a"
             examples = {[]}
-            argNames = {["d", "xs"]}
+            argNames = {["x", "xs"]}
             setSearchType = {setSearchType}
             setExamples = {setExamples}
             setArgNames = {setArgNames}
@@ -107,8 +107,8 @@ const ConnectedExampleSearchCard = (props) => {
                     <div>
                         <ul>
                             <li>{searchByTypeOnly}</li>
-                            <li>{searchByExampleOnly}</li>
-                            <li>{searchByTypeAndExamples}</li>
+                            {/* <li>{searchByExampleOnly}</li>
+                            <li>{searchByTypeAndExamples}</li> */}
                         </ul>
                     </div>
                 </div>

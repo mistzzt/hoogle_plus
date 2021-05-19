@@ -3,13 +3,13 @@ const defaultValue = !(process.env.REACT_APP_LIMIT_FEATURES || false);
 
 const features = {
     search: {
-        permitExamples: defaultValue,
+        permitExamples: false,
         permitTypeCandidates: defaultValue,
     },
     results: {
         permitExamples: defaultValue,
-        permitEditExamples: defaultValue,
-        permitKeepUsage: defaultValue,
+        permitEditExamples: false,
+        permitKeepUsage: false,
         enableGetMoreExamples: defaultValue,
     }
 };
