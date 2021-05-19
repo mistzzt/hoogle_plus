@@ -12,7 +12,8 @@ cache = ExpiringDict(max_len=100, max_age_seconds=(2 * TIMEOUT))
 with open("./dataset.yml", 'r') as stream:
     data = yaml.safe_load(stream)
 
-EXAMPLE_USED = 'unsorted_examples'
+EXAMPLE_USED = os.environ.get("EXAMPLE_USED")
+print(EXAMPLE_USED)
 
 def create_app(test_config=None):
     # create and configure the app
