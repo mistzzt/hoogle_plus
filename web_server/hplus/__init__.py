@@ -50,11 +50,26 @@ def create_app(test_config=None):
             typesOnly = list(map(str.strip, map(lambda xs: xs[1] if len(xs) > 1 else xs[0], params)))
             return " -> ".join(typesOnly)
 
+        def extract_param_name_from_query(s):
+            params = filter(lambda x: len(x) == 2, map(lambda x: x.split(":"), s.split("->")))
+            return list(map(str.strip, map(lambda xs: xs[0], params)))
+
+        def extract_param_name_from_candidate(s):
+            return s.split("->")[0].strip().strip("\\").split(" ")
+
+        def replace_param_names(candidate, query):
+            param_map = dict(zip(extract_param_name_from_candidate(candidate), extract_param_name_from_query(query)))
+            for i, j in param_map.items():
+                candidate = re.sub(r"\b%s\b" % i, j, candidate)
+            return candidate
+
         obj = json.loads(request.data)
         qid = uuid.uuid1()
 
+
+
         all_candidates = filter(lambda x: remove_param_name(x['query']) == remove_param_name(obj['typeSignature']), data)
-        entry_to_json = lambda x: json.dumps({'id': qid, 'candidates': [{'code': x['candidate'], 'examples': x[EXAMPLE_USED]}], 'error': '', 'docs': []}) + '\n'
+        entry_to_json = lambda x: json.dumps({'id': qid, 'candidates': [{'code': replace_param_names(x['candidate'], obj['typeSignature']), 'examples': x[EXAMPLE_USED]}], 'error': '', 'docs': []}) + '\n'
 
         cache[str(qid)] = 0
         return Response(map(entry_to_json, all_candidates), mimetype='application/json')
