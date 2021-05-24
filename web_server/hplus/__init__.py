@@ -50,7 +50,12 @@ def create_app(test_config=None):
             typesOnly = list(map(str.strip, map(lambda xs: xs[1] if len(xs) > 1 else xs[0], params)))
             return " -> ".join(typesOnly)
 
+        def remove_typeclass(s):
+            s = s.split("=>")
+            return s[1] if len(s) > 1 else s[0]
+
         def extract_param_name_from_query(s):
+            s = remove_typeclass(s)
             params = filter(lambda x: len(x) == 2, map(lambda x: x.split(":"), s.split("->")))
             return list(map(str.strip, map(lambda xs: xs[0], params)))
 
