@@ -1,1 +1,2 @@
 REACT_APP_DEVELOPMENT_HOST="http://hplus.wzt.me:5000" PORT=4000 yarn start
+REACT_APP_DEVELOPMENT_HOST="http://hplus.wzt.me:5002" PORT=4002 yarn start
