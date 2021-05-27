@@ -11997,3 +11997,935 @@
     - '1'
     - '""'
     output: Right ""
+
+- name: eitherTriple
+  query: Either a b -> Either a b -> Either a b
+  candidate: \arg0 arg1 -> bool arg0 arg0 (isLeft arg1)
+  sorted_examples:
+  - inputs:
+    - Left -1
+    - Left 8
+    output: Left -1
+  - inputs:
+    - Right "b"
+    - Right "dbcc"
+    output: Right "b"
+  - inputs:
+    - Left 2
+    - Right ""
+    output: Left 2
+  - inputs:
+    - Right "a"
+    - Left 2
+    output: Right "a"
+  control_examples:
+  - inputs:
+    - Right "c"
+    - Left 1
+    output: Right "c"
+  - inputs:
+    - Right ""
+    - Left 0
+    output: Right ""
+  - inputs:
+    - Left 5
+    - Right ""
+    output: Left 5
+  - inputs:
+    - Right ""
+    - Right "aa"
+    output: Right ""
+  - inputs:
+    - Right ""
+    - Left 8
+    output: Right ""
+  - inputs:
+    - Left 10
+    - Left 4
+    output: Left 10
+  - inputs:
+    - Right ""
+    - Left 4
+    output: Right ""
+  - inputs:
+    - Left 4
+    - Right ""
+    output: Left 4
+  - inputs:
+    - Left -1
+    - Left 8
+    output: Left -1
+  - inputs:
+    - Left 5
+    - Left 10
+    output: Left 5
+  - inputs:
+    - Left 8
+    - Right "b"
+    output: Left 8
+  - inputs:
+    - Right ""
+    - Left 8
+    output: Right ""
+  - inputs:
+    - Right "d"
+    - Right "da"
+    output: Right "d"
+  - inputs:
+    - Right "bdc"
+    - Right "a"
+    output: Right "bdc"
+  - inputs:
+    - Right ""
+    - Right "cbbd"
+    output: Right ""
+  - inputs:
+    - Right ""
+    - Right "addd"
+    output: Right ""
+  - inputs:
+    - Left 0
+    - Left 2
+    output: Left 0
+  - inputs:
+    - Right "b"
+    - Right "dbcc"
+    output: Right "b"
+  - inputs:
+    - Left 2
+    - Left 7
+    output: Left 2
+  - inputs:
+    - Right ""
+    - Right "ca"
+    output: Right ""
+  - inputs:
+    - Left 0
+    - Right "b"
+    output: Left 0
+  - inputs:
+    - Right "a"
+    - Left 2
+    output: Right "a"
+  - inputs:
+    - Left 6
+    - Right ""
+    output: Left 6
+  - inputs:
+    - Right ""
+    - Right ""
+    output: Right ""
+  - inputs:
+    - Right "dc"
+    - Left 10
+    output: Right "dc"
+  - inputs:
+    - Left 7
+    - Right "b"
+    output: Left 7
+  - inputs:
+    - Right "b"
+    - Right "bbbc"
+    output: Right "b"
+  - inputs:
+    - Left 2
+    - Right ""
+    output: Left 2
+- name: eitherTriple
+  query: Either a b -> Either a b -> Either a b
+  candidate: \arg0 arg1 -> bool arg0 arg1 (isLeft arg1)
+  sorted_examples:
+  - inputs:
+    - Left 0
+    - Right "ab"
+    output: Left 0
+  - inputs:
+    - Right "d"
+    - Left 1
+    output: Left 1
+  - inputs:
+    - Right ""
+    - Right ""
+    output: Right ""
+  - inputs:
+    - Left 10
+    - Left 4
+    output: Left 4
+  control_examples:
+  - inputs:
+    - Right ""
+    - Left 4
+    output: Left 4
+  - inputs:
+    - Right "a"
+    - Left 2
+    output: Left 2
+  - inputs:
+    - Right ""
+    - Right ""
+    output: Right ""
+  - inputs:
+    - Right ""
+    - Left 7
+    output: Left 7
+  - inputs:
+    - Right "b"
+    - Right "a"
+    output: Right "b"
+  - inputs:
+    - Left 8
+    - Left 1
+    output: Left 1
+  - inputs:
+    - Left 9
+    - Right "da"
+    output: Left 9
+  - inputs:
+    - Left 7
+    - Left -2
+    output: Left -2
+  - inputs:
+    - Left 1
+    - Right "ccdb"
+    output: Left 1
+  - inputs:
+    - Left -2
+    - Right ""
+    output: Left -2
+  - inputs:
+    - Right "a"
+    - Left -2
+    output: Left -2
+  - inputs:
+    - Right "b"
+    - Left 9
+    output: Left 9
+  - inputs:
+    - Right "a"
+    - Left 10
+    output: Left 10
+  - inputs:
+    - Right ""
+    - Right "ddd"
+    output: Right ""
+  - inputs:
+    - Right ""
+    - Right ""
+    output: Right ""
+  - inputs:
+    - Left 0
+    - Right "ab"
+    output: Left 0
+  - inputs:
+    - Right "ba"
+    - Left 6
+    output: Left 6
+  - inputs:
+    - Left 2
+    - Left 10
+    output: Left 10
+  - inputs:
+    - Left 10
+    - Left 4
+    output: Left 4
+  - inputs:
+    - Left 0
+    - Left 5
+    output: Left 5
+  - inputs:
+    - Right "d"
+    - Left 1
+    output: Left 1
+  - inputs:
+    - Right "ba"
+    - Right "daa"
+    output: Right "ba"
+  - inputs:
+    - Left 7
+    - Right ""
+    output: Left 7
+  - inputs:
+    - Left 8
+    - Left 10
+    output: Left 10
+  - inputs:
+    - Left 10
+    - Right ""
+    output: Left 10
+  - inputs:
+    - Left 4
+    - Left -2
+    output: Left -2
+  - inputs:
+    - Left 9
+    - Left 9
+    output: Left 9
+  - inputs:
+    - Right "b"
+    - Left -1
+    output: Left -1
+- name: eitherTriple
+  query: Either a b -> Either a b -> Either a b
+  candidate: \arg0 arg1 -> bool arg1 arg0 (isLeft arg0)
+  sorted_examples:
+  - inputs:
+    - Left 7
+    - Left -2
+    output: Left 7
+  - inputs:
+    - Right "dbb"
+    - Right "b"
+    output: Right "b"
+  - inputs:
+    - Right ""
+    - Left 10
+    output: Left 10
+  - inputs:
+    - Left -1
+    - Right "c"
+    output: Left -1
+  control_examples:
+  - inputs:
+    - Right ""
+    - Left 10
+    output: Left 10
+  - inputs:
+    - Left 2
+    - Left 9
+    output: Left 2
+  - inputs:
+    - Left 3
+    - Left 3
+    output: Left 3
+  - inputs:
+    - Left -2
+    - Left 10
+    output: Left -2
+  - inputs:
+    - Right "aac"
+    - Left 2
+    output: Left 2
+  - inputs:
+    - Left 6
+    - Right ""
+    output: Left 6
+  - inputs:
+    - Left 0
+    - Right ""
+    output: Left 0
+  - inputs:
+    - Right "cc"
+    - Right "dbda"
+    output: Right "dbda"
+  - inputs:
+    - Left 2
+    - Left 2
+    output: Left 2
+  - inputs:
+    - Left 7
+    - Right ""
+    output: Left 7
+  - inputs:
+    - Right "dbb"
+    - Right "b"
+    output: Right "b"
+  - inputs:
+    - Left 5
+    - Right ""
+    output: Left 5
+  - inputs:
+    - Right "cac"
+    - Right "bddbdb"
+    output: Right "bddbdb"
+  - inputs:
+    - Left 6
+    - Right "ad"
+    output: Left 6
+  - inputs:
+    - Right "dbb"
+    - Left 7
+    output: Left 7
+  - inputs:
+    - Left 7
+    - Left -2
+    output: Left 7
+  - inputs:
+    - Right ""
+    - Right "addd"
+    output: Right "addd"
+  - inputs:
+    - Left -1
+    - Right "c"
+    output: Left -1
+  - inputs:
+    - Right ""
+    - Right "b"
+    output: Right "b"
+  - inputs:
+    - Left 0
+    - Left -2
+    output: Left 0
+  - inputs:
+    - Left -1
+    - Right "a"
+    output: Left -1
+  - inputs:
+    - Left 8
+    - Left 1
+    output: Left 8
+  - inputs:
+    - Right ""
+    - Left 9
+    output: Left 9
+  - inputs:
+    - Right "d"
+    - Left 8
+    output: Left 8
+  - inputs:
+    - Left -2
+    - Right ""
+    output: Left -2
+  - inputs:
+    - Right ""
+    - Left 0
+    output: Left 0
+  - inputs:
+    - Right "b"
+    - Right "dbcc"
+    output: Right "dbcc"
+  - inputs:
+    - Left 3
+    - Left 10
+    output: Left 3
+- name: eitherTriple
+  query: Either a b -> Either a b -> Either a b
+  candidate: \arg0 arg1 -> bool arg1 arg0 (isLeft arg1)
+  sorted_examples:
+  - inputs:
+    - Left -1
+    - Right "c"
+    output: Right "c"
+  - inputs:
+    - Right ""
+    - Left 0
+    output: Right ""
+  - inputs:
+    - Left 1
+    - Left -2
+    output: Left 1
+  - inputs:
+    - Right "dd"
+    - Right "bacdaa"
+    output: Right "bacdaa"
+  control_examples:
+  - inputs:
+    - Right ""
+    - Right "cbbd"
+    output: Right "cbbd"
+  - inputs:
+    - Right "dd"
+    - Right "bacdaa"
+    output: Right "bacdaa"
+  - inputs:
+    - Left 4
+    - Left 6
+    output: Left 4
+  - inputs:
+    - Right ""
+    - Right ""
+    output: Right ""
+  - inputs:
+    - Left 2
+    - Left 9
+    output: Left 2
+  - inputs:
+    - Left 1
+    - Left -2
+    output: Left 1
+  - inputs:
+    - Left -2
+    - Left 0
+    output: Left -2
+  - inputs:
+    - Right "cd"
+    - Right "c"
+    output: Right "c"
+  - inputs:
+    - Right "cad"
+    - Right "c"
+    output: Right "c"
+  - inputs:
+    - Right "bdc"
+    - Right "a"
+    output: Right "a"
+  - inputs:
+    - Right ""
+    - Left 3
+    output: Right ""
+  - inputs:
+    - Left 4
+    - Left -1
+    output: Left 4
+  - inputs:
+    - Left 2
+    - Left 5
+    output: Left 2
+  - inputs:
+    - Left 5
+    - Left 4
+    output: Left 5
+  - inputs:
+    - Left 8
+    - Right ""
+    output: Right ""
+  - inputs:
+    - Right ""
+    - Left 10
+    output: Right ""
+  - inputs:
+    - Right "a"
+    - Left -2
+    output: Right "a"
+  - inputs:
+    - Right ""
+    - Left -2
+    output: Right ""
+  - inputs:
+    - Left 6
+    - Left 10
+    output: Left 6
+  - inputs:
+    - Right ""
+    - Left 2
+    output: Right ""
+  - inputs:
+    - Left -1
+    - Right "c"
+    output: Right "c"
+  - inputs:
+    - Right ""
+    - Left 0
+    output: Right ""
+  - inputs:
+    - Right ""
+    - Left 7
+    output: Right ""
+  - inputs:
+    - Right "dab"
+    - Right ""
+    output: Right ""
+  - inputs:
+    - Right ""
+    - Right ""
+    output: Right ""
+  - inputs:
+    - Left 0
+    - Right "da"
+    output: Right "da"
+  - inputs:
+    - Right ""
+    - Left 3
+    output: Right ""
+  - inputs:
+    - Right "cc"
+    - Right "acc"
+    output: Right "acc"
+- name: eitherTriple
+  query: Either a b -> Either a b -> Either a b
+  candidate: \arg0 arg1 -> bool arg1 arg1 (isLeft arg0)
+  sorted_examples:
+  - inputs:
+    - Left 5
+    - Left 4
+    output: Left 4
+  - inputs:
+    - Right "abaad"
+    - Right ""
+    output: Right ""
+  - inputs:
+    - Left 7
+    - Right ""
+    output: Right ""
+  - inputs:
+    - Right "cc"
+    - Left 0
+    output: Left 0
+  control_examples:
+  - inputs:
+    - Left 4
+    - Right "bdc"
+    output: Right "bdc"
+  - inputs:
+    - Left 0
+    - Left 8
+    output: Left 8
+  - inputs:
+    - Left 7
+    - Right ""
+    output: Right ""
+  - inputs:
+    - Right "a"
+    - Right "bc"
+    output: Right "bc"
+  - inputs:
+    - Right ""
+    - Left 3
+    output: Left 3
+  - inputs:
+    - Left 7
+    - Right "bac"
+    output: Right "bac"
+  - inputs:
+    - Right "cc"
+    - Left 0
+    output: Left 0
+  - inputs:
+    - Left -2
+    - Left 0
+    output: Left 0
+  - inputs:
+    - Right "bdb"
+    - Left 10
+    output: Left 10
+  - inputs:
+    - Right "abaad"
+    - Right ""
+    output: Right ""
+  - inputs:
+    - Right ""
+    - Right "d"
+    output: Right "d"
+  - inputs:
+    - Right "bac"
+    - Left 4
+    output: Left 4
+  - inputs:
+    - Left 6
+    - Left -2
+    output: Left -2
+  - inputs:
+    - Left -2
+    - Right ""
+    output: Right ""
+  - inputs:
+    - Right "d"
+    - Right "d"
+    output: Right "d"
+  - inputs:
+    - Right "aacb"
+    - Right "cdaca"
+    output: Right "cdaca"
+  - inputs:
+    - Left -2
+    - Left 5
+    output: Left 5
+  - inputs:
+    - Right ""
+    - Right ""
+    output: Right ""
+  - inputs:
+    - Right "c"
+    - Left 4
+    output: Left 4
+  - inputs:
+    - Left 5
+    - Left 4
+    output: Left 4
+  - inputs:
+    - Left -2
+    - Right ""
+    output: Right ""
+  - inputs:
+    - Right ""
+    - Right ""
+    output: Right ""
+  - inputs:
+    - Right "cb"
+    - Right "ba"
+    output: Right "ba"
+  - inputs:
+    - Left 2
+    - Left 7
+    output: Left 7
+  - inputs:
+    - Left 2
+    - Right "cba"
+    output: Right "cba"
+  - inputs:
+    - Left 10
+    - Right "b"
+    output: Right "b"
+  - inputs:
+    - Left 7
+    - Right ""
+    output: Right ""
+  - inputs:
+    - Right ""
+    - Left 0
+    output: Left 0
+- name: eitherTriple
+  query: Either a b -> Either a b -> Either a b
+  candidate: \arg0 arg1 -> bool arg0 arg1 (isLeft arg0)
+  sorted_examples:
+  - inputs:
+    - Left -1
+    - Left 8
+    output: Left 8
+  - inputs:
+    - Right "dbb"
+    - Right "b"
+    output: Right "dbb"
+  - inputs:
+    - Left 2
+    - Right ""
+    output: Right ""
+  - inputs:
+    - Right "d"
+    - Left 1
+    output: Right "d"
+  control_examples:
+  - inputs:
+    - Left 5
+    - Right ""
+    output: Right ""
+  - inputs:
+    - Right "bba"
+    - Right "aabbbd"
+    output: Right "bba"
+  - inputs:
+    - Right ""
+    - Left 4
+    output: Right ""
+  - inputs:
+    - Left 2
+    - Right ""
+    output: Right ""
+  - inputs:
+    - Right "b"
+    - Right "bbcdb"
+    output: Right "b"
+  - inputs:
+    - Right "dbb"
+    - Right "b"
+    output: Right "dbb"
+  - inputs:
+    - Left -1
+    - Left 8
+    output: Left 8
+  - inputs:
+    - Left -1
+    - Left 6
+    output: Left 6
+  - inputs:
+    - Right "cc"
+    - Left 0
+    output: Right "cc"
+  - inputs:
+    - Right "dadab"
+    - Left -2
+    output: Right "dadab"
+  - inputs:
+    - Left 6
+    - Right "a"
+    output: Right "a"
+  - inputs:
+    - Right "d"
+    - Left 1
+    output: Right "d"
+  - inputs:
+    - Left 6
+    - Right "a"
+    output: Right "a"
+  - inputs:
+    - Left 10
+    - Left 9
+    output: Left 9
+  - inputs:
+    - Right "abaad"
+    - Right ""
+    output: Right "abaad"
+  - inputs:
+    - Right "addd"
+    - Right "abcdac"
+    output: Right "addd"
+  - inputs:
+    - Right ""
+    - Left 10
+    output: Right ""
+  - inputs:
+    - Right "dd"
+    - Right "bacdaa"
+    output: Right "dd"
+  - inputs:
+    - Left 1
+    - Left -2
+    output: Left -2
+  - inputs:
+    - Right "db"
+    - Left 6
+    output: Right "db"
+  - inputs:
+    - Left 0
+    - Left 7
+    output: Left 7
+  - inputs:
+    - Left 0
+    - Right "ab"
+    output: Right "ab"
+  - inputs:
+    - Right ""
+    - Left -1
+    output: Right ""
+  - inputs:
+    - Right "dcb"
+    - Right "adc"
+    output: Right "dcb"
+  - inputs:
+    - Left 4
+    - Left 1
+    output: Left 1
+  - inputs:
+    - Right "db"
+    - Left 4
+    output: Right "db"
+  - inputs:
+    - Right "a"
+    - Right "c"
+    output: Right "a"
+  - inputs:
+    - Right "cdda"
+    - Left -2
+    output: Right "cdda"
+- name: eitherTriple
+  query: Either a b -> Either a b -> Either a b
+  candidate: \arg0 arg1 -> bool (fromJust Nothing) arg0 (isLeft arg1)
+  sorted_examples:
+  - inputs:
+    - Left 7
+    - Right "bac"
+    output: "bottom"
+  - inputs:
+    - Left 2
+    - Left 10
+    output: Left 2
+  - inputs:
+    - Right ""
+    - Left 4
+    output: Right ""
+  - inputs:
+    - Right ""
+    - Right ""
+    output: "bottom"
+  control_examples:
+  - inputs:
+    - Right "cd"
+    - Right "c"
+    output: "bottom"
+  - inputs:
+    - Left 7
+    - Right "b"
+    output: "bottom"
+  - inputs:
+    - Left 8
+    - Right ""
+    output: "bottom"
+  - inputs:
+    - Left 7
+    - Right "cbbcb"
+    output: "bottom"
+  - inputs:
+    - Right "c"
+    - Right "d"
+    output: "bottom"
+  - inputs:
+    - Right "a"
+    - Left 1
+    output: Right "a"
+  - inputs:
+    - Left 8
+    - Left 4
+    output: Left 8
+  - inputs:
+    - Left 0
+    - Left 7
+    output: Left 0
+  - inputs:
+    - Left 7
+    - Right "bac"
+    output: "bottom"
+  - inputs:
+    - Left 9
+    - Left 5
+    output: Left 9
+  - inputs:
+    - Left 2
+    - Left 10
+    output: Left 2
+  - inputs:
+    - Right ""
+    - Right "b"
+    output: "bottom"
+  - inputs:
+    - Left 10
+    - Left 9
+    output: Left 10
+  - inputs:
+    - Right ""
+    - Right ""
+    output: "bottom"
+  - inputs:
+    - Left 1
+    - Left 4
+    output: Left 1
+  - inputs:
+    - Right ""
+    - Right ""
+    output: "bottom"
+  - inputs:
+    - Right "cddc"
+    - Right "bc"
+    output: "bottom"
+  - inputs:
+    - Right ""
+    - Right ""
+    output: "bottom"
+  - inputs:
+    - Left 6
+    - Right ""
+    output: "bottom"
+  - inputs:
+    - Left 6
+    - Right ""
+    output: "bottom"
+  - inputs:
+    - Right "aca"
+    - Right "ba"
+    output: "bottom"
+  - inputs:
+    - Left 1
+    - Left 4
+    output: Left 1
+  - inputs:
+    - Left -1
+    - Left 1
+    output: Left -1
+  - inputs:
+    - Right ""
+    - Right ""
+    output: "bottom"
+  - inputs:
+    - Right ""
+    - Right ""
+    output: "bottom"
+  - inputs:
+    - Right ""
+    - Left 4
+    output: Right ""
+  - inputs:
+    - Right "adcdd"
+    - Right "c"
+    output: "bottom"
+  - inputs:
+    - Right "bb"
+    - Left 0
+    output: Right "bb"
